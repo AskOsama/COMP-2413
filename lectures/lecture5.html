@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture 5: SQL Queries - Basics</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="lecture5_ar.html" class="lang-button" title="Switch to Arabic">العربية</a>
+    </div>
+
+    <header>
+        <h1>SQL Queries - Basics</h1>
+        <p class="subtitle">Lecture 5: Writing Basic SQL Queries with FROM, WHERE, LIKE, and ORDER BY</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>Contents</h2>
+        <ul>
+            <li><a href="#objectives">Learning Objectives</a></li>
+            <li><a href="#university-db">University Database Schema</a></li>
+            <li><a href="#from-where">1. FROM and WHERE Clauses</a></li>
+            <li><a href="#string-ops">2. String Operations (LIKE)</a></li>
+            <li><a href="#order-by">3. ORDER BY Clause</a></li>
+            <li><a href="#exercises">Practice Exercises</a></li>
+            <li><a href="#review">Review Questions</a></li>
+            <li><a href="#summary">Summary</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <p>By the end of this lecture, you will be able to:</p>
+            <ul>
+                <li>Write SQL queries using SELECT, FROM, and WHERE clauses</li>
+                <li>Use logical connectives (AND, OR, NOT) in WHERE conditions</li>
+                <li>Apply comparison operators (&lt;, &lt;=, &gt;, &gt;=, =, &lt;&gt;) in queries</li>
+                <li>Use the LIKE operator with wildcards (% and _) for string matching</li>
+                <li>Use DISTINCT to eliminate duplicate rows from results</li>
+                <li>Sort query results using ORDER BY (ASC and DESC)</li>
+            </ul>
+        </section>
+
+        <!-- University Database Schema -->
+        <section id="university-db" class="content-section">
+            <h2>University Database Schema</h2>
+
+            <p>Throughout this lecture, we will use the following University Database with four related tables:</p>
+
+            <h3>Student Table</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sid</th>
+                            <th>Sname</th>
+                            <th>Age</th>
+                            <th>Sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>Mohamed Al Tamimi</td><td>22</td><td>M</td></tr>
+                        <tr><td>2</td><td>Sarra Al Askar</td><td>21</td><td>F</td></tr>
+                        <tr><td>3</td><td>Munera Al Jomoa</td><td>23</td><td>F</td></tr>
+                        <tr><td>4</td><td>Ali Al Askar</td><td>25</td><td>M</td></tr>
+                        <tr><td>5</td><td>Salah Al Ghamdi</td><td>20</td><td>M</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Professor Table</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Pid</th>
+                            <th>Pname</th>
+                            <th>Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>Prof. Awartef</td><td>Professor</td></tr>
+                        <tr><td>2</td><td>Dr. Fahd</td><td>Assistant Professor</td></tr>
+                        <tr><td>3</td><td>Dr. Ameera</td><td>Assistant Professor</td></tr>
+                        <tr><td>4</td><td>Miss. Olfa</td><td>Assistant</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Course Table</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cid</th>
+                            <th>Cname</th>
+                            <th>Pid</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>C1</td><td>Programming 2</td><td>3</td></tr>
+                        <tr><td>C2</td><td>Data Structure</td><td>1</td></tr>
+                        <tr><td>C3</td><td>Programming1</td><td>2</td></tr>
+                        <tr><td>C4</td><td>Statistic</td><td>3</td></tr>
+                        <tr><td>C5</td><td>Visual Programming</td><td>2</td></tr>
+                        <tr><td>C6</td><td>Internet Programming</td><td>3</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Marks Table</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sid</th>
+                            <th>Cid</th>
+                            <th>Mark</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>C1</td><td>35</td></tr>
+                        <tr><td>1</td><td>C3</td><td>22</td></tr>
+                        <tr><td>1</td><td>C4</td><td>18</td></tr>
+                        <tr><td>2</td><td>C2</td><td>17</td></tr>
+                        <tr><td>2</td><td>C3</td><td>35</td></tr>
+                        <tr><td>3</td><td>C2</td><td>32</td></tr>
+                        <tr><td>3</td><td>C4</td><td>28</td></tr>
+                        <tr><td>4</td><td>C2</td><td>33</td></tr>
+                        <tr><td>4</td><td>C4</td><td>15</td></tr>
+                        <tr><td>5</td><td>C5</td><td>38</td></tr>
+                        <tr><td>5</td><td>C6</td><td>39</td></tr>
+                        <tr><td>5</td><td>C1</td><td>40</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 1: FROM and WHERE Clauses -->
+        <section id="from-where" class="content-section">
+            <h2>1. FROM and WHERE Clauses</h2>
+
+            <div class="definition">
+                <h4>SQL Query Syntax</h4>
+                <p>A basic SQL query has the following structure:</p>
+                <div class="code-block">
+<span class="keyword">SELECT</span> column1, column2, ...
+<span class="keyword">FROM</span> table_name
+<span class="keyword">WHERE</span> condition;
+                </div>
+                <p>The <strong>WHERE</strong> clause supports logical connectives (<code>AND</code>, <code>OR</code>, <code>NOT</code>) and comparison operators (<code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code>, <code>=</code>, <code>&lt;&gt;</code>).</p>
+            </div>
+
+            <div class="example">
+                <h4>Example 1: Find the Sid and name of male students who have age &gt; 20</h4>
+                <div class="code-block">
+<span class="keyword">SELECT</span> Sid, Sname
+<span class="keyword">FROM</span> Student
+<span class="keyword">WHERE</span> sex = <span class="string">'M'</span> <span class="keyword">AND</span> age &gt; <span class="number">20</span>;
+                </div>
+            </div>
+
+            <h4>Query Result</h4>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr><th>Sid</th><th>Sname</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>Mohamed Al Tamimi</td></tr>
+                        <tr><td>4</td><td>Ali Al Askar</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="example">
+                <h4>Example 2: Find the Pid and name of all Assistant Professors</h4>
+                <div class="code-block">
+<span class="keyword">SELECT</span> Pid, Pname
+<span class="keyword">FROM</span> Professor
+<span class="keyword">WHERE</span> grade = <span class="string">'Assistant Professor'</span>;
+                </div>
+            </div>
+
+            <h4>Query Result</h4>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr><th>Pid</th><th>Pname</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>2</td><td>Dr. Fahd</td></tr>
+                        <tr><td>3</td><td>Dr. Ameera</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="example">
+                <h4>Example 3: Find the mark of student 3 in course C4</h4>
+                <div class="code-block">
+<span class="keyword">SELECT</span> Mark
+<span class="keyword">FROM</span> Marks
+<span class="keyword">WHERE</span> Sid = <span class="number">3</span> <span class="keyword">AND</span> Cid = <span class="string">'C4'</span>;
+                </div>
+            </div>
+
+            <h4>Query Result</h4>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr><th>Mark</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>28</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="example">
+                <h4>Example 4: Find the grade of all professors</h4>
+                <div class="code-block">
+<span class="keyword">SELECT</span> Grade
+<span class="keyword">FROM</span> Professor;
+                </div>
+            </div>
+
+            <h4>Query Result (with duplicates)</h4>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr><th>Grade</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Professor</td></tr>
+                        <tr><td>Assistant Professor</td></tr>
+                        <tr><td>Assistant Professor</td></tr>
+                        <tr><td>Assistant</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tip-box">
+                <h4>Using DISTINCT to Remove Duplicates</h4>
+                <p>To eliminate duplicate rows from the result, use the <code>DISTINCT</code> keyword:</p>
+                <div class="code-block">
+<span class="keyword">SELECT DISTINCT</span> Grade
+<span class="keyword">FROM</span> Professor;
+                </div>
+            </div>
+
+            <h4>Query Result (duplicates removed)</h4>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr><th>Grade</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Professor</td></tr>
+                        <tr><td>Assistant Professor</td></tr>
+                        <tr><td>Assistant</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 2: String Operations -->
+        <section id="string-ops" class="content-section">
+            <h2>2. String Operations (LIKE)</h2>
+
+            <div class="definition">
+                <h4>Definition: LIKE Operator</h4>
+                <p>SQL includes a string-matching operator for comparisons on character strings. The operator <code>LIKE</code> uses patterns that are described using two special characters:</p>
+            </div>
+
+            <div class="concept-cards">
+                <div class="concept-card">
+                    <div class="icon">%</div>
+                    <h4>Percent (%)</h4>
+                    <p>Matches <strong>any substring</strong> (including empty string)</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">_</div>
+                    <h4>Underscore (_)</h4>
+                    <p>Matches <strong>any single character</strong></p>
+                </div>
+            </div>
+
+            <div class="example">
+                <h4>Example 5: Find the id and names of students whose name includes the substring 'ra'</h4>
+                <div class="code-block">
+<span class="keyword">SELECT</span> Sid, Sname
+<span class="keyword">FROM</span> Student
+<span class="keyword">WHERE</span> Sname <span class="keyword">LIKE</span> <span class="string">'%ra%'</span>;
+                </div>
+            </div>
+
+            <h4>Query Result</h4>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr><th>Sid</th><th>Sname</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>2</td><td>Sarra Al Askar</td></tr>
+                        <tr><td>3</td><td>Munera Al Jomoa</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="example">
+                <h4>Example 6: Find the Cid and the name of all programming courses</h4>
+                <div class="code-block">
+<span class="keyword">SELECT</span> Cid, Cname
+<span class="keyword">FROM</span> Course
+<span class="keyword">WHERE</span> Cname <span class="keyword">LIKE</span> <span class="string">'%programming%'</span>;
+                </div>
+            </div>
+
+            <h4>Query Result</h4>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr><th>Cid</th><th>Cname</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>C1</td><td>Programming 2</td></tr>
+                        <tr><td>C3</td><td>Programming1</td></tr>
+                        <tr><td>C5</td><td>Visual Programming</td></tr>
+                        <tr><td>C6</td><td>Internet Programming</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tip-box">
+                <h4>LIKE Pattern Examples</h4>
+                <div class="table-demo">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Pattern</th>
+                                <th>Matches</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>'%ing'</code></td>
+                                <td>Any string ending with "ing"</td>
+                            </tr>
+                            <tr>
+                                <td><code>'Pro%'</code></td>
+                                <td>Any string starting with "Pro"</td>
+                            </tr>
+                            <tr>
+                                <td><code>'%gram%'</code></td>
+                                <td>Any string containing "gram"</td>
+                            </tr>
+                            <tr>
+                                <td><code>'_r%'</code></td>
+                                <td>Any string with "r" as the second character</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: ORDER BY Clause -->
+        <section id="order-by" class="content-section">
+            <h2>3. ORDER BY Clause</h2>
+
+            <div class="definition">
+                <h4>Definition: ORDER BY</h4>
+                <p>The <code>ORDER BY</code> clause orders the rows in a query result in <strong>ascending</strong> (<code>ASC</code>) or <strong>descending</strong> (<code>DESC</code>) order. The default order is ascending.</p>
+            </div>
+
+            <h3>Syntax</h3>
+            <div class="code-block">
+<span class="keyword">SELECT</span> column1, column2
+<span class="keyword">FROM</span> table_name
+<span class="keyword">WHERE</span> condition
+<span class="keyword">ORDER BY</span> column_name <span class="keyword">ASC</span>|<span class="keyword">DESC</span>;
+            </div>
+
+            <div class="example">
+                <h4>Example 7: Find the Sid, name and age of male students ordered by descending age</h4>
+                <div class="code-block">
+<span class="keyword">SELECT</span> Sid, Sname, Age
+<span class="keyword">FROM</span> Student
+<span class="keyword">WHERE</span> sex = <span class="string">'M'</span>
+<span class="keyword">ORDER BY</span> Age <span class="keyword">DESC</span>;
+                </div>
+            </div>
+
+            <h4>Query Result</h4>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr><th>Sid</th><th>Sname</th><th>Age</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>4</td><td>Ali Al Askar</td><td>25</td></tr>
+                        <tr><td>1</td><td>Mohamed Al Tamimi</td><td>22</td></tr>
+                        <tr><td>5</td><td>Salah Al Ghamdi</td><td>20</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="key-message">
+                <h4>ASC vs DESC</h4>
+                <p><strong>ASC</strong> (ascending) sorts from smallest to largest (A-Z, 0-9). <strong>DESC</strong> (descending) sorts from largest to smallest (Z-A, 9-0). If no order is specified, <code>ASC</code> is the default.</p>
+            </div>
+        </section>
+
+        <!-- Practice Exercises -->
+        <section id="exercises" class="content-section">
+            <h2>Practice Exercises</h2>
+
+            <div class="review-questions">
+                <h3>Write SQL Queries For These Tasks</h3>
+                <p>Using the University Database tables (Student, Professor, Course, Marks):</p>
+                <ol>
+                    <li>
+                        <strong>Question 1:</strong> Find the Sid and the name of female students who have age &lt; 22
+                        <details>
+                            <summary>Show Answer</summary>
+                            <div class="code-block">
+<span class="keyword">SELECT</span> Sid, Sname
+<span class="keyword">FROM</span> Student
+<span class="keyword">WHERE</span> sex = <span class="string">'F'</span> <span class="keyword">AND</span> age &lt; <span class="number">22</span>;
+                            </div>
+                            <div class="table-demo">
+                                <table>
+                                    <thead><tr><th>Sid</th><th>Sname</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>2</td><td>Sarra Al Askar</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </details>
+                    </li>
+                    <li>
+                        <strong>Question 2:</strong> Find the Sid and name of students who have age &gt;= 23 or whose name includes the substring "Al Askar"
+                        <details>
+                            <summary>Show Answer</summary>
+                            <div class="code-block">
+<span class="keyword">SELECT</span> Sid, Sname
+<span class="keyword">FROM</span> Student
+<span class="keyword">WHERE</span> age &gt;= <span class="number">23</span> <span class="keyword">OR</span> Sname <span class="keyword">LIKE</span> <span class="string">'%Al Askar%'</span>;
+                            </div>
+                            <div class="table-demo">
+                                <table>
+                                    <thead><tr><th>Sid</th><th>Sname</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>2</td><td>Sarra Al Askar</td></tr>
+                                        <tr><td>3</td><td>Munera Al Jomoa</td></tr>
+                                        <tr><td>4</td><td>Ali Al Askar</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </details>
+                    </li>
+                    <li>
+                        <strong>Question 3:</strong> Find the Sid and mark of students in the course C4 ordered by descending Mark
+                        <details>
+                            <summary>Show Answer</summary>
+                            <div class="code-block">
+<span class="keyword">SELECT</span> Sid, Mark
+<span class="keyword">FROM</span> Marks
+<span class="keyword">WHERE</span> Cid = <span class="string">'C4'</span>
+<span class="keyword">ORDER BY</span> Mark <span class="keyword">DESC</span>;
+                            </div>
+                            <div class="table-demo">
+                                <table>
+                                    <thead><tr><th>Sid</th><th>Mark</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>3</td><td>28</td></tr>
+                                        <tr><td>1</td><td>18</td></tr>
+                                        <tr><td>4</td><td>15</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </details>
+                    </li>
+                    <li>
+                        <strong>Question 4:</strong> Find the name and Pid of the professor who teaches the course Programming 2
+                        <details>
+                            <summary>Show Answer</summary>
+                            <div class="code-block">
+<span class="keyword">SELECT</span> Pname, Professor.Pid
+<span class="keyword">FROM</span> Professor, Course
+<span class="keyword">WHERE</span> Cname = <span class="string">'Programming 2'</span>
+  <span class="keyword">AND</span> Professor.Pid = Course.Pid;
+                            </div>
+                            <div class="table-demo">
+                                <table>
+                                    <thead><tr><th>Pname</th><th>Pid</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>Dr. Ameera</td><td>3</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </details>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Review Questions -->
+        <section id="review" class="content-section">
+            <h2>Review Questions</h2>
+
+            <div class="review-questions">
+                <h3>Multiple Choice Questions</h3>
+
+                <p><strong>Question 5:</strong> How many records will show in the output of this SQL command?</p>
+                <div class="code-block">
+<span class="keyword">SELECT</span> *
+<span class="keyword">FROM</span> Marks
+<span class="keyword">WHERE</span> Sid = <span class="number">3</span>;
+                </div>
+                <ol type="A">
+                    <li>3</li>
+                    <li><strong>2</strong></li>
+                    <li>4</li>
+                    <li>6</li>
+                </ol>
+
+                <p><strong>Question 6:</strong> What is the output when you run this SQL command?</p>
+                <div class="code-block">
+<span class="keyword">SELECT</span> Sid, Mark
+<span class="keyword">FROM</span> Marks
+<span class="keyword">WHERE</span> Cid = <span class="string">'C3'</span>;
+                </div>
+                <div class="table-demo">
+                    <table>
+                        <thead>
+                            <tr><th>Option</th><th>Result</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>A)</td><td>Sid: 1, Mark: 35 &amp; Sid: 2, Mark: 23</td></tr>
+                            <tr><td>B)</td><td>Sid: 2, Mark: 35 &amp; Sid: 4, Mark: 15</td></tr>
+                            <tr><td>C)</td><td>Sid: 1, Mark: 22 &amp; Sid: 2, Mark: 35 &amp; Sid: 5, Mark: 40</td></tr>
+                            <tr><td><strong>D)</strong></td><td><strong>Sid: 1, Mark: 22 &amp; Sid: 2, Mark: 35</strong></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p><strong>Question 7:</strong> Which SQL query finds the mark of student 1 in course 'C2'?</p>
+                <ol type="A">
+                    <li><code>SELECT Sid, Mark FROM Marks WHERE Cid='C2';</code></li>
+                    <li><code>SELECT Mark FROM Marks WHERE Cid='C2' AND Sid &lt;&gt; 1;</code></li>
+                    <li><code>SELECT Mark FROM Marks WHERE Cid='C2' OR Sid=1;</code></li>
+                    <li><strong><code>SELECT Mark FROM Marks WHERE Cid='C2' AND Sid=1;</code></strong></li>
+                </ol>
+
+                <p><strong>Question 8:</strong> Which SQL query finds the Sid and marks in course 'C4' ordered by ascending Sid?</p>
+                <ol type="A">
+                    <li><strong><code>SELECT Sid, Mark FROM Marks WHERE Cid='C4' ORDER BY Sid ASC;</code></strong></li>
+                    <li><code>SELECT Sid, Mark FROM Marks WHERE Sid=4 ORDER BY Sid DESC;</code></li>
+                    <li><code>SELECT Sid, Mark FROM Marks WHERE Cid='C4' ORDER BY Sid DESC;</code></li>
+                    <li><code>SELECT Max(Mark) FROM Marks WHERE Cid='C4' ORDER BY Sid ASC;</code></li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>Summary and Key Takeaways</h2>
+
+            <h3>What We've Learned</h3>
+            <ol>
+                <li><strong>SQL Query Structure:</strong> The basic query uses <code>SELECT ... FROM ... WHERE ...</code> to retrieve filtered data from tables.</li>
+
+                <li><strong>WHERE Clause:</strong> Filters rows using comparison operators (<code>=</code>, <code>&lt;&gt;</code>, <code>&gt;</code>, <code>&lt;</code>, <code>&gt;=</code>, <code>&lt;=</code>) and logical connectives (<code>AND</code>, <code>OR</code>, <code>NOT</code>).</li>
+
+                <li><strong>DISTINCT:</strong> Eliminates duplicate rows from query results using <code>SELECT DISTINCT</code>.</li>
+
+                <li><strong>String Operations:</strong> The <code>LIKE</code> operator with <code>%</code> (any substring) and <code>_</code> (any single character) enables pattern matching on string columns.</li>
+
+                <li><strong>ORDER BY:</strong> Sorts query results in ascending (<code>ASC</code>) or descending (<code>DESC</code>) order. Default is ascending.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>Looking Ahead:</strong> In the next lecture, we will explore SQL Queries - Advanced topics including aggregate functions, GROUP BY, HAVING, and more complex query patterns.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="credits">
+            <h2>Credits</h2>
+            <p>Database Programming Course - COMP 2413</p>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index.html">&larr; Back to Course Home</a>
+        </p>
+    </footer>
+</body>
+</html>

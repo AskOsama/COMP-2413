@@ -1,0 +1,856 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lectures 3 & 4: SQL Data Manipulation & Control Language</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="lecture3_ar.html" class="lang-button" title="Switch to Arabic">العربية</a>
+    </div>
+
+    <header>
+        <h1>SQL Data Manipulation & Control Language</h1>
+        <p class="subtitle">Lectures 3 & 4: Working with Data in Database Tables</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>Contents</h2>
+        <ul>
+            <li><a href="#objectives">Learning Objectives</a></li>
+            <li><a href="#dml-overview">1. Data Manipulation Language (DML) Overview</a></li>
+            <li><a href="#insert-into">2. INSERT INTO</a></li>
+            <li><a href="#select">3. SELECT — Retrieving Data</a></li>
+            <li><a href="#select-where">4. SELECT with WHERE</a></li>
+            <li><a href="#delete">5. DELETE</a></li>
+            <li><a href="#update-all">6. UPDATE — All Rows</a></li>
+            <li><a href="#update-specific">7. UPDATE — Specific Rows</a></li>
+            <li><a href="#dcl">8. Data Control Language (DCL)</a></li>
+            <li><a href="#exercises">Practice Exercises</a></li>
+            <li><a href="#review">Review Questions</a></li>
+            <li><a href="#summary">Summary</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <p>By the end of these lectures, you will be able to:</p>
+            <ul>
+                <li>Understand the role of DML in SQL</li>
+                <li>Insert new records into tables using INSERT INTO</li>
+                <li>Retrieve data using SELECT (all columns and specific columns)</li>
+                <li>Filter query results using SELECT with WHERE conditions</li>
+                <li>Delete records from tables using DELETE</li>
+                <li>Update all rows or specific rows using UPDATE with SET</li>
+                <li>Understand Data Control Language (DCL) commands: GRANT and REVOKE</li>
+                <li>Control database access permissions</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: DML Overview -->
+        <section id="dml-overview" class="content-section">
+            <h2>1. Data Manipulation Language (DML) Overview</h2>
+
+            <div class="definition">
+                <h4>Definition: DML</h4>
+                <p><strong>Data Manipulation Language (DML)</strong> is the subset of SQL used to add, retrieve, modify, and remove data stored in database tables. While DDL defines the structure, DML works with the actual data inside those structures.</p>
+            </div>
+
+            <h3>Main DML Commands</h3>
+            <div class="concept-cards">
+                <div class="concept-card">
+                    <div class="icon">➕</div>
+                    <h4>INSERT</h4>
+                    <p>Add new rows of data into a table</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">🔍</div>
+                    <h4>SELECT</h4>
+                    <p>Retrieve and display data from one or more tables</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">✏️</div>
+                    <h4>UPDATE</h4>
+                    <p>Modify existing data in a table</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">🗑️</div>
+                    <h4>DELETE</h4>
+                    <p>Remove rows of data from a table</p>
+                </div>
+            </div>
+
+            <h3>DML Commands Reference</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Command</th>
+                            <th>Purpose</th>
+                            <th>Example</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>SELECT</strong></td>
+                            <td>Retrieve data from tables</td>
+                            <td><code>SELECT * FROM Student;</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>INSERT</strong></td>
+                            <td>Add new rows to a table</td>
+                            <td><code>INSERT INTO Student VALUES (...);</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>UPDATE</strong></td>
+                            <td>Modify existing data</td>
+                            <td><code>UPDATE Student SET age = 22;</code></td>
+                        </tr>
+                        <tr>
+                            <td><strong>DELETE</strong></td>
+                            <td>Remove rows from a table</td>
+                            <td><code>DELETE FROM Student WHERE ...;</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tip-box">
+                <h4>Lecture Focus</h4>
+                <p>In these lectures, we focus on <strong>DML (Data Manipulation Language)</strong> — the commands used to work with data inside tables — and introduce <strong>DCL (Data Control Language)</strong> for managing access permissions.</p>
+            </div>
+        </section>
+
+        <!-- Section 2: INSERT INTO -->
+        <section id="insert-into" class="content-section">
+            <h2>2. INSERT INTO</h2>
+
+            <p>The INSERT INTO statement adds new rows of data into an existing table.</p>
+
+            <h3>Syntax</h3>
+            <div class="code-block">
+<span class="keyword">INSERT INTO</span> table_name
+<span class="keyword">VALUES</span> (value1, value2, value3, ...);
+            </div>
+
+            <div class="warning-box">
+                <h4>Important Rules</h4>
+                <ul>
+                    <li>The values must be listed in the <strong>same order</strong> as the columns in the table</li>
+                    <li>String values must be enclosed in <strong>single quotes</strong> (<code>'text'</code>)</li>
+                    <li>Numeric values do not need quotes</li>
+                    <li>The number of values must match the number of columns</li>
+                </ul>
+            </div>
+
+            <h3>Student Table Structure</h3>
+            <p>Recall the Student table from Lecture 2:</p>
+            <div class="code-block">
+<span class="comment">-- Student table: Sid (PK), sname, age, sex</span>
+<span class="keyword">CREATE TABLE</span> Student (
+    Sid     <span class="keyword">INTEGER</span> <span class="keyword">PRIMARY KEY</span>,
+    sname   <span class="keyword">VARCHAR</span>(<span class="number">100</span>),
+    age     <span class="keyword">INTEGER</span>,
+    sex     <span class="keyword">VARCHAR</span>(<span class="number">10</span>)
+);
+            </div>
+
+            <h3>Examples: Inserting Data</h3>
+            <div class="example">
+                <h4>Insert Student Records</h4>
+                <div class="code-block">
+<span class="comment">-- Insert first student</span>
+<span class="keyword">INSERT INTO</span> Student
+<span class="keyword">VALUES</span> (<span class="number">1</span>, <span class="string">'Sarah Altalab'</span>, <span class="number">20</span>, <span class="string">'F'</span>);
+
+<span class="comment">-- Insert second student</span>
+<span class="keyword">INSERT INTO</span> Student
+<span class="keyword">VALUES</span> (<span class="number">2</span>, <span class="string">'Munira Alhssine'</span>, <span class="number">21</span>, <span class="string">'F'</span>);
+
+<span class="comment">-- Insert third student</span>
+<span class="keyword">INSERT INTO</span> Student
+<span class="keyword">VALUES</span> (<span class="number">3</span>, <span class="string">'Haya Aldoussari'</span>, <span class="number">21</span>, <span class="string">'F'</span>);
+
+<span class="comment">-- Insert fourth student</span>
+<span class="keyword">INSERT INTO</span> Student
+<span class="keyword">VALUES</span> (<span class="number">4</span>, <span class="string">'Wafa Alothman'</span>, <span class="number">22</span>, <span class="string">'F'</span>);
+                </div>
+            </div>
+
+            <h3>Resulting Table</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sid</th>
+                            <th>sname</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Sarah Altalab</td>
+                            <td>20</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Munira Alhssine</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Haya Aldoussari</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Wafa Alothman</td>
+                            <td>22</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tip-box">
+                <h4>Column-Specific INSERT</h4>
+                <p>You can also specify which columns to insert into:</p>
+                <div class="code-block">
+<span class="keyword">INSERT INTO</span> Student (Sid, sname, age, sex)
+<span class="keyword">VALUES</span> (<span class="number">5</span>, <span class="string">'Nora Alharbi'</span>, <span class="number">20</span>, <span class="string">'F'</span>);
+                </div>
+                <p>This is useful when the table has columns with default values or when you want to insert into specific columns only.</p>
+            </div>
+        </section>
+
+        <!-- Section 3: SELECT — Retrieving Data -->
+        <section id="select" class="content-section">
+            <h2>3. SELECT — Retrieving Data</h2>
+
+            <p>The SELECT statement retrieves data from one or more tables. It is the most commonly used SQL command.</p>
+
+            <h3>Form 1: Select Specific Columns</h3>
+            <div class="code-block">
+<span class="keyword">SELECT</span> column1, column2, ...
+<span class="keyword">FROM</span> table_name;
+            </div>
+
+            <div class="example">
+                <h4>Example: Select Name and Age</h4>
+                <div class="code-block">
+<span class="comment">-- Retrieve only name and age columns</span>
+<span class="keyword">SELECT</span> sname, age
+<span class="keyword">FROM</span> Student;
+                </div>
+            </div>
+
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>sname</th>
+                            <th>age</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Sarah Altalab</td>
+                            <td>20</td>
+                        </tr>
+                        <tr>
+                            <td>Munira Alhssine</td>
+                            <td>21</td>
+                        </tr>
+                        <tr>
+                            <td>Haya Aldoussari</td>
+                            <td>21</td>
+                        </tr>
+                        <tr>
+                            <td>Wafa Alothman</td>
+                            <td>22</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Form 2: Select All Columns</h3>
+            <div class="code-block">
+<span class="keyword">SELECT</span> *
+<span class="keyword">FROM</span> table_name;
+            </div>
+
+            <div class="example">
+                <h4>Example: Select All Student Data</h4>
+                <div class="code-block">
+<span class="comment">-- Retrieve all columns from Student table</span>
+<span class="keyword">SELECT</span> *
+<span class="keyword">FROM</span> Student;
+                </div>
+            </div>
+
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sid</th>
+                            <th>sname</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Sarah Altalab</td>
+                            <td>20</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Munira Alhssine</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Haya Aldoussari</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Wafa Alothman</td>
+                            <td>22</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="key-message">
+                <h4>Key Difference</h4>
+                <p>Use <code>SELECT *</code> to retrieve all columns, or list specific column names to retrieve only the data you need. Specifying columns is generally better practice as it makes your queries more efficient and readable.</p>
+            </div>
+        </section>
+
+        <!-- Section 4: SELECT with WHERE -->
+        <section id="select-where" class="content-section">
+            <h2>4. SELECT with WHERE</h2>
+
+            <p>The WHERE clause filters rows based on a condition. Only rows that satisfy the condition are returned.</p>
+
+            <h3>Syntax: All Columns with Condition</h3>
+            <div class="code-block">
+<span class="keyword">SELECT</span> *
+<span class="keyword">FROM</span> table_name
+<span class="keyword">WHERE</span> condition;
+            </div>
+
+            <h3>Syntax: Specific Columns with Condition</h3>
+            <div class="code-block">
+<span class="keyword">SELECT</span> column1, column2
+<span class="keyword">FROM</span> table_name
+<span class="keyword">WHERE</span> condition;
+            </div>
+
+            <div class="example">
+                <h4>Example: Find Students Aged 21 (All Columns)</h4>
+                <div class="code-block">
+<span class="comment">-- Retrieve all data for students aged 21</span>
+<span class="keyword">SELECT</span> *
+<span class="keyword">FROM</span> Student
+<span class="keyword">WHERE</span> age = <span class="number">21</span>;
+                </div>
+            </div>
+
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sid</th>
+                            <th>sname</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>2</td>
+                            <td>Munira Alhssine</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Haya Aldoussari</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="example">
+                <h4>Example: Find Names of Students Aged 21 (Specific Columns)</h4>
+                <div class="code-block">
+<span class="comment">-- Retrieve only names of students aged 21</span>
+<span class="keyword">SELECT</span> sname
+<span class="keyword">FROM</span> Student
+<span class="keyword">WHERE</span> age = <span class="number">21</span>;
+                </div>
+            </div>
+
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>sname</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Munira Alhssine</td>
+                        </tr>
+                        <tr>
+                            <td>Haya Aldoussari</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tip-box">
+                <h4>Common WHERE Operators</h4>
+                <div class="table-demo">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Operator</th>
+                                <th>Meaning</th>
+                                <th>Example</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>=</code></td>
+                                <td>Equal to</td>
+                                <td><code>WHERE age = 21</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>!=</code> or <code>&lt;&gt;</code></td>
+                                <td>Not equal to</td>
+                                <td><code>WHERE age != 21</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>&gt;</code></td>
+                                <td>Greater than</td>
+                                <td><code>WHERE age > 20</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>&lt;</code></td>
+                                <td>Less than</td>
+                                <td><code>WHERE age < 22</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>&gt;=</code></td>
+                                <td>Greater than or equal</td>
+                                <td><code>WHERE age >= 21</code></td>
+                            </tr>
+                            <tr>
+                                <td><code>&lt;=</code></td>
+                                <td>Less than or equal</td>
+                                <td><code>WHERE age <= 21</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: DELETE -->
+        <section id="delete" class="content-section">
+            <h2>5. DELETE</h2>
+
+            <p>The DELETE statement removes rows from a table based on a condition.</p>
+
+            <h3>Syntax</h3>
+            <div class="code-block">
+<span class="keyword">DELETE FROM</span> table_name
+<span class="keyword">WHERE</span> condition;
+            </div>
+
+            <div class="example">
+                <h4>Example: Delete a Student by Name</h4>
+                <div class="code-block">
+<span class="comment">-- Delete the student named 'Haya Aldoussari'</span>
+<span class="keyword">DELETE FROM</span> Student
+<span class="keyword">WHERE</span> sname = <span class="string">'Haya Aldoussari'</span>;
+                </div>
+            </div>
+
+            <h3>Table After DELETE</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sid</th>
+                            <th>sname</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Sarah Altalab</td>
+                            <td>20</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Munira Alhssine</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Wafa Alothman</td>
+                            <td>22</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="warning-box">
+                <h4>Caution: DELETE Without WHERE</h4>
+                <p>If you omit the WHERE clause, <strong>all rows</strong> in the table will be deleted!</p>
+                <div class="code-block">
+<span class="comment">-- DANGER: This deletes ALL rows from the table!</span>
+<span class="keyword">DELETE FROM</span> Student;
+                </div>
+                <p>Always double-check your WHERE condition before executing a DELETE statement.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: UPDATE — All Rows -->
+        <section id="update-all" class="content-section">
+            <h2>6. UPDATE — All Rows</h2>
+
+            <p>The UPDATE statement modifies existing data in a table. When used <strong>without a WHERE clause</strong>, it updates every row.</p>
+
+            <h3>Syntax</h3>
+            <div class="code-block">
+<span class="keyword">UPDATE</span> table_name
+<span class="keyword">SET</span> column_name = new_value;
+            </div>
+
+            <div class="example">
+                <h4>Example: Set All Names to 'Fatima'</h4>
+                <div class="code-block">
+<span class="comment">-- Update ALL student names to 'Fatima'</span>
+<span class="keyword">UPDATE</span> Student
+<span class="keyword">SET</span> sname = <span class="string">'Fatima'</span>;
+                </div>
+            </div>
+
+            <h3>Table After UPDATE (All Rows)</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sid</th>
+                            <th>sname</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Fatima</td>
+                            <td>20</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Fatima</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Fatima</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Fatima</td>
+                            <td>22</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="warning-box">
+                <h4>Be Careful!</h4>
+                <p>Without a WHERE clause, <strong>every row</strong> in the table is updated. This is usually not the intended behavior. Always verify that you want to change all rows before omitting WHERE.</p>
+            </div>
+        </section>
+
+        <!-- Section 7: UPDATE — Specific Rows -->
+        <section id="update-specific" class="content-section">
+            <h2>7. UPDATE — Specific Rows</h2>
+
+            <p>To update only certain rows, add a WHERE clause to specify which rows to modify.</p>
+
+            <h3>Syntax</h3>
+            <div class="code-block">
+<span class="keyword">UPDATE</span> table_name
+<span class="keyword">SET</span> column_name = new_value
+<span class="keyword">WHERE</span> condition;
+            </div>
+
+            <div class="example">
+                <h4>Example: Update Name Where Age = 21</h4>
+                <div class="code-block">
+<span class="comment">-- Update name to 'Fatima' only for students aged 21</span>
+<span class="keyword">UPDATE</span> Student
+<span class="keyword">SET</span> sname = <span class="string">'Fatima'</span>
+<span class="keyword">WHERE</span> age = <span class="number">21</span>;
+                </div>
+            </div>
+
+            <h3>Table Before UPDATE</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sid</th>
+                            <th>sname</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Sarah Altalab</td>
+                            <td>20</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td>Munira Alhssine</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td>Haya Aldoussari</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Wafa Alothman</td>
+                            <td>22</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Table After UPDATE (Specific Rows)</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sid</th>
+                            <th>sname</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1</td>
+                            <td>Sarah Altalab</td>
+                            <td>20</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>2</td>
+                            <td><strong>Fatima</strong></td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>3</td>
+                            <td><strong>Fatima</strong></td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4</td>
+                            <td>Wafa Alothman</td>
+                            <td>22</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="key-message">
+                <h4>UPDATE vs DELETE</h4>
+                <p><strong>UPDATE</strong> changes data but keeps the rows. <strong>DELETE</strong> removes entire rows. Both use WHERE to target specific rows — and both affect ALL rows when WHERE is omitted.</p>
+            </div>
+        </section>
+
+        <!-- Section 8: DCL -->
+        <section id="dcl" class="content-section">
+            <h2>8. Data Control Language (DCL)</h2>
+
+            <div class="definition">
+                <h4>Definition: DCL</h4>
+                <p><strong>Data Control Language (DCL)</strong> is the subset of SQL used to control access to data in the database. DCL commands manage user permissions and security.</p>
+            </div>
+
+            <div class="concept-cards">
+                <div class="concept-card">
+                    <div class="icon">✅</div>
+                    <h4>GRANT</h4>
+                    <p>Gives specific privileges to users or roles, allowing them to perform certain operations on database objects.</p>
+                    <div class="code-block">
+<span class="keyword">GRANT</span> permission
+<span class="keyword">ON</span> object
+<span class="keyword">TO</span> user;
+                    </div>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">🚫</div>
+                    <h4>REVOKE</h4>
+                    <p>Removes previously granted privileges from users or roles, restricting their access to database objects.</p>
+                    <div class="code-block">
+<span class="keyword">REVOKE</span> permission
+<span class="keyword">ON</span> object
+<span class="keyword">FROM</span> user;
+                    </div>
+                </div>
+            </div>
+
+            <div class="example">
+                <h4>DCL Examples</h4>
+                <div class="code-block">
+<span class="comment">-- Grant SELECT permission on Student table to user 'ahmed'</span>
+<span class="keyword">GRANT</span> <span class="keyword">SELECT</span>
+<span class="keyword">ON</span> Student
+<span class="keyword">TO</span> ahmed;
+
+<span class="comment">-- Grant INSERT and UPDATE permissions on Student table to user 'sara'</span>
+<span class="keyword">GRANT</span> <span class="keyword">INSERT</span>, <span class="keyword">UPDATE</span>
+<span class="keyword">ON</span> Student
+<span class="keyword">TO</span> sara;
+
+<span class="comment">-- Revoke UPDATE permission from user 'sara'</span>
+<span class="keyword">REVOKE</span> <span class="keyword">UPDATE</span>
+<span class="keyword">ON</span> Student
+<span class="keyword">FROM</span> sara;
+                </div>
+            </div>
+
+            <div class="key-message">
+                <h4>Why DCL Matters</h4>
+                <p>In real-world databases, not every user should have full access. DCL allows database administrators to enforce the <strong>principle of least privilege</strong> — users get only the permissions they need to do their job.</p>
+            </div>
+        </section>
+
+        <!-- Exercises -->
+        <section id="exercises" class="content-section">
+            <h2>Practice Exercises</h2>
+
+            <div class="review-questions">
+                <h3>Write SQL Statements For These Tasks</h3>
+                <p>Using the Student, Course, and Marks tables from Lecture 2:</p>
+                <ol>
+                    <li>Insert a new student with Sid=5, name='Nora Alharbi', age=20, sex='F'</li>
+                    <li>Insert a new course with Cid=101, cname='Database Programming', Pid=1</li>
+                    <li>Retrieve all data from the Course table</li>
+                    <li>Retrieve only the names and ages of all students</li>
+                    <li>Find all students whose age is greater than 20</li>
+                    <li>Update the age of the student with Sid=1 to 21</li>
+                    <li>Delete the student whose name is 'Wafa Alothman'</li>
+                    <li>Grant SELECT permission on the Student table to a user named 'admin'</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Review Questions -->
+        <section id="review" class="content-section">
+            <h2>Review Questions</h2>
+
+            <div class="review-questions">
+                <h3>Test Your Understanding</h3>
+                <ol>
+                    <li>What does DML stand for, and what are its four main commands?</li>
+                    <li>What is the difference between DML and DDL?</li>
+                    <li>Why must the values in an INSERT statement match the column order of the table?</li>
+                    <li>What is the difference between <code>SELECT *</code> and <code>SELECT column1, column2</code>?</li>
+                    <li>What happens if you execute a DELETE statement without a WHERE clause?</li>
+                    <li>What is the difference between UPDATE without WHERE and UPDATE with WHERE?</li>
+                    <li>What does DCL stand for, and what are its two main commands?</li>
+                    <li>Explain the difference between GRANT and REVOKE with an example.</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>Summary and Key Takeaways</h2>
+
+            <h3>What We've Learned</h3>
+            <ol>
+                <li><strong>DML Overview:</strong> Data Manipulation Language includes INSERT, SELECT, UPDATE, and DELETE for working with data in tables.</li>
+
+                <li><strong>INSERT INTO:</strong> Adds new rows to a table. Values must match the column order and data types.</li>
+
+                <li><strong>SELECT:</strong> Retrieves data — use <code>*</code> for all columns or list specific column names.</li>
+
+                <li><strong>WHERE Clause:</strong> Filters rows based on conditions. Used with SELECT, UPDATE, and DELETE.</li>
+
+                <li><strong>DELETE:</strong> Removes rows from a table. Without WHERE, all rows are deleted.</li>
+
+                <li><strong>UPDATE:</strong> Modifies existing data. Without WHERE, all rows are updated; with WHERE, only matching rows change.</li>
+
+                <li><strong>DCL:</strong> Data Control Language (GRANT and REVOKE) manages database access permissions.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>Looking Ahead:</strong> In the next lecture, we will explore SQL Queries in more depth — learning about sorting with ORDER BY, aggregate functions (COUNT, SUM, AVG), and grouping data with GROUP BY.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="credits">
+            <h2>Credits</h2>
+            <p>Database Programming Course - COMP 2413</p>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index.html">&larr; Back to Course Home</a>
+        </p>
+    </footer>
+</body>
+</html>

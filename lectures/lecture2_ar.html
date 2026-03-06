@@ -1,0 +1,611 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المحاضرة 2: لغة تعريف البيانات SQL DDL</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="lecture2.html" class="lang-button" title="Switch to English">English</a>
+    </div>
+
+    <header>
+        <h1>لغة تعريف البيانات SQL</h1>
+        <p class="subtitle">المحاضرة 2: إنشاء وإدارة هياكل قواعد البيانات</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>المحتويات</h2>
+        <ul>
+            <li><a href="#objectives">أهداف التعلم</a></li>
+            <li><a href="#sql-overview">1. نظرة عامة على SQL</a></li>
+            <li><a href="#sql-components">2. مكونات SQL</a></li>
+            <li><a href="#create-database">3. إنشاء قاعدة البيانات CREATE DATABASE</a></li>
+            <li><a href="#create-table">4. إنشاء الجدول CREATE TABLE</a></li>
+            <li><a href="#primary-keys">5. المفاتيح الأساسية</a></li>
+            <li><a href="#foreign-keys">6. المفاتيح الخارجية</a></li>
+            <li><a href="#university-schema">7. مخطط قاعدة بيانات الجامعة</a></li>
+            <li><a href="#alter-table">8. تعديل الجدول ALTER TABLE</a></li>
+            <li><a href="#drop-statements">9. عبارات الحذف DROP</a></li>
+            <li><a href="#rename-table">10. إعادة تسمية الجدول RENAME</a></li>
+            <li><a href="#exercises">تمارين</a></li>
+            <li><a href="#review">أسئلة المراجعة</a></li>
+            <li><a href="#summary">الملخص</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>أهداف التعلم</h2>
+            <p>بنهاية هذه المحاضرة، ستكون قادراً على:</p>
+            <ul>
+                <li>فهم دور SQL في أنظمة قواعد البيانات العلائقية</li>
+                <li>تحديد المكونات الثلاثة الرئيسية لـ SQL (DDL، DML، DCL)</li>
+                <li>إنشاء قواعد البيانات والجداول باستخدام عبارات CREATE</li>
+                <li>تحديد أنواع البيانات المناسبة لأعمدة الجدول</li>
+                <li>تنفيذ المفاتيح الأساسية (المفردة والمركبة)</li>
+                <li>إنشاء علاقات المفاتيح الخارجية بين الجداول</li>
+                <li>تعديل هياكل الجداول باستخدام ALTER TABLE</li>
+                <li>إزالة كائنات قاعدة البيانات باستخدام عبارات DROP</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: SQL Overview -->
+        <section id="sql-overview" class="content-section">
+            <h2>1. نظرة عامة على SQL</h2>
+
+            <div class="definition">
+                <h4>تعريف: SQL</h4>
+                <p><strong>SQL (لغة الاستعلام الهيكلية)</strong> هي اللغة المعيارية لإدارة ومعالجة قواعد البيانات العلائقية. تتيح لك إنشاء وتعديل والاستعلام عن البيانات والتحكم في الوصول إلى البيانات المخزنة في نظام إدارة قواعد البيانات العلائقية (RDBMS).</p>
+            </div>
+
+            <h3>خصائص أنظمة RDBMS</h3>
+            <div class="concept-cards">
+                <div class="concept-card">
+                    <div class="icon">📊</div>
+                    <h4>البيانات في جداول</h4>
+                    <p>البيانات منظمة في جداول (علاقات) مع صفوف وأعمدة</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">🔗</div>
+                    <h4>العلاقات</h4>
+                    <p>يمكن ربط الجداول من خلال أعمدة مشتركة (مفاتيح)</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">📝</div>
+                    <h4>لغة SQL</h4>
+                    <p>لغة معيارية لجميع عمليات قواعد البيانات العلائقية</p>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <h4>لماذا SQL؟</h4>
+                <p>SQL هي <strong>لغة تصريحية</strong> - تصف ماذا تريد، وليس كيف تحصل عليه. نظام DBMS يحسّن خطة التنفيذ تلقائياً.</p>
+            </div>
+        </section>
+
+        <!-- Section 2: SQL Components -->
+        <section id="sql-components" class="content-section">
+            <h2>2. مكونات SQL</h2>
+
+            <p>تنقسم SQL إلى ثلاث فئات رئيسية بناءً على نوع العمليات:</p>
+
+            <div class="concept-cards">
+                <div class="concept-card">
+                    <div class="icon">🏗️</div>
+                    <h4>DDL - لغة تعريف البيانات</h4>
+                    <p>(Data Definition Language)</p>
+                    <p>تحدد هيكل قاعدة البيانات</p>
+                    <ul>
+                        <li><code>CREATE</code> - إنشاء الكائنات</li>
+                        <li><code>ALTER</code> - تعديل الكائنات</li>
+                        <li><code>DROP</code> - حذف الكائنات</li>
+                        <li><code>RENAME</code> - إعادة تسمية الكائنات</li>
+                    </ul>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">📝</div>
+                    <h4>DML - لغة معالجة البيانات</h4>
+                    <p>(Data Manipulation Language)</p>
+                    <p>تعمل مع البيانات في الجداول</p>
+                    <ul>
+                        <li><code>SELECT</code> - استعلام البيانات</li>
+                        <li><code>INSERT</code> - إضافة البيانات</li>
+                        <li><code>UPDATE</code> - تعديل البيانات</li>
+                        <li><code>DELETE</code> - إزالة البيانات</li>
+                    </ul>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">🔐</div>
+                    <h4>DCL - لغة التحكم في البيانات</h4>
+                    <p>(Data Control Language)</p>
+                    <p>تتحكم في صلاحيات الوصول</p>
+                    <ul>
+                        <li><code>GRANT</code> - منح الصلاحيات</li>
+                        <li><code>REVOKE</code> - إزالة الصلاحيات</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <h4>تركيز هذه المحاضرة</h4>
+                <p>في هذه المحاضرة، نركز على <strong>DDL (لغة تعريف البيانات)</strong> - الأوامر المستخدمة لإنشاء وإدارة هياكل قواعد البيانات.</p>
+            </div>
+        </section>
+
+        <!-- Section 3: CREATE DATABASE -->
+        <section id="create-database" class="content-section">
+            <h2>3. إنشاء قاعدة البيانات CREATE DATABASE</h2>
+
+            <p>قبل إنشاء الجداول، يجب أولاً إنشاء قاعدة بيانات لاحتوائها.</p>
+
+            <h3>الصيغة</h3>
+            <div class="code-block">
+<span class="keyword">CREATE DATABASE</span> database_name;
+            </div>
+
+            <h3>مثال</h3>
+            <div class="code-block">
+<span class="comment">-- إنشاء قاعدة بيانات جديدة باسم University</span>
+<span class="keyword">CREATE DATABASE</span> University;
+            </div>
+
+            <h3>عبارة USE</h3>
+            <p>بعد إنشاء قاعدة البيانات، يجب تحديدها قبل إنشاء الجداول:</p>
+            <div class="code-block">
+<span class="comment">-- تحديد قاعدة بيانات University</span>
+<span class="keyword">USE</span> University;
+            </div>
+
+            <div class="example">
+                <h4>مثال كامل</h4>
+                <div class="code-block">
+<span class="comment">-- الخطوة 1: إنشاء قاعدة البيانات</span>
+<span class="keyword">CREATE DATABASE</span> University;
+
+<span class="comment">-- الخطوة 2: تحديد قاعدة البيانات للاستخدام</span>
+<span class="keyword">USE</span> University;
+
+<span class="comment">-- الآن يمكنك إنشاء جداول في هذه القاعدة</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: CREATE TABLE -->
+        <section id="create-table" class="content-section">
+            <h2>4. إنشاء الجدول CREATE TABLE</h2>
+
+            <p>عبارة CREATE TABLE تحدد جدولاً جديداً مع أعمدته وأنواع بياناته.</p>
+
+            <h3>الصيغة الأساسية</h3>
+            <div class="code-block">
+<span class="keyword">CREATE TABLE</span> table_name (
+    column1 datatype,
+    column2 datatype,
+    column3 datatype,
+    ...
+);
+            </div>
+
+            <h3>أنواع البيانات الشائعة</h3>
+            <div class="db-types-grid">
+                <div class="db-type-card">
+                    <div class="db-type-icon">🔢</div>
+                    <h4>INTEGER / INT</h4>
+                    <p>أعداد صحيحة</p>
+                    <span class="db-type-desc">العمر، الكمية، المعرف</span>
+                </div>
+                <div class="db-type-card">
+                    <div class="db-type-icon">🔤</div>
+                    <h4>VARCHAR(n)</h4>
+                    <p>نص متغير الطول حتى n حرف</p>
+                    <span class="db-type-desc">الأسماء، البريد، العناوين</span>
+                </div>
+                <div class="db-type-card">
+                    <div class="db-type-icon">📅</div>
+                    <h4>DATE</h4>
+                    <p>قيم التاريخ (YYYY-MM-DD)</p>
+                    <span class="db-type-desc">تاريخ الميلاد، تاريخ التوظيف</span>
+                </div>
+                <div class="db-type-card">
+                    <div class="db-type-icon">💰</div>
+                    <h4>DECIMAL(p,s)</h4>
+                    <p>أرقام عشرية دقيقة</p>
+                    <span class="db-type-desc">السعر، الراتب، المعدل</span>
+                </div>
+            </div>
+
+            <h3>مثال: جدول بسيط</h3>
+            <div class="code-block">
+<span class="comment">-- إنشاء جدول مؤلفين بسيط</span>
+<span class="keyword">CREATE TABLE</span> authors (
+    author_id   <span class="keyword">INTEGER</span>,
+    first_name  <span class="keyword">VARCHAR</span>(<span class="number">50</span>),
+    last_name   <span class="keyword">VARCHAR</span>(<span class="number">50</span>),
+    birth_date  <span class="keyword">DATE</span>
+);
+            </div>
+
+            <div class="warning-box">
+                <h4>ملاحظات مهمة</h4>
+                <ul>
+                    <li>يجب أن تكون أسماء الجداول والأعمدة وصفية</li>
+                    <li>اختر أنواع البيانات المناسبة لكل عمود</li>
+                    <li>حجم VARCHAR يجب أن يستوعب الطول الأقصى المتوقع</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 5: Primary Keys -->
+        <section id="primary-keys" class="content-section">
+            <h2>5. المفاتيح الأساسية</h2>
+
+            <div class="definition">
+                <h4>تعريف: المفتاح الأساسي (Primary Key)</h4>
+                <p><strong>المفتاح الأساسي</strong> هو عمود (أو مجموعة أعمدة) يحدد كل صف في الجدول بشكل فريد. قيم المفتاح الأساسي يجب أن تكون فريدة ولا يمكن أن تكون NULL.</p>
+            </div>
+
+            <h3>مفتاح أساسي من عمود واحد</h3>
+            <div class="code-block">
+<span class="comment">-- الطريقة 1: تعريف مضمن</span>
+<span class="keyword">CREATE TABLE</span> Student (
+    Sid     <span class="keyword">INTEGER</span> <span class="keyword">PRIMARY KEY</span>,
+    sname   <span class="keyword">VARCHAR</span>(<span class="number">100</span>),
+    age     <span class="keyword">INTEGER</span>,
+    sex     <span class="keyword">VARCHAR</span>(<span class="number">10</span>)
+);
+            </div>
+
+            <div class="code-block">
+<span class="comment">-- الطريقة 2: قيد في النهاية</span>
+<span class="keyword">CREATE TABLE</span> Student (
+    Sid     <span class="keyword">INTEGER</span>,
+    sname   <span class="keyword">VARCHAR</span>(<span class="number">100</span>),
+    age     <span class="keyword">INTEGER</span>,
+    sex     <span class="keyword">VARCHAR</span>(<span class="number">10</span>),
+    <span class="keyword">PRIMARY KEY</span> (Sid)
+);
+            </div>
+
+            <h3>المفتاح الأساسي المركب</h3>
+            <p>عندما لا يستطيع عمود واحد تحديد الصف بشكل فريد، يمكنك استخدام عدة أعمدة معاً:</p>
+
+            <div class="code-block">
+<span class="comment">-- مفتاح أساسي مركب من عمودين</span>
+<span class="keyword">CREATE TABLE</span> Marks (
+    Sid     <span class="keyword">INTEGER</span>,
+    Cid     <span class="keyword">INTEGER</span>,
+    marks   <span class="keyword">INTEGER</span>,
+    <span class="keyword">PRIMARY KEY</span> (Sid, Cid)
+);
+            </div>
+
+            <div class="key-message">
+                <h4>الفكرة الرئيسية</h4>
+                <p>في جدول Marks، لا يستطيع Sid أو Cid بمفرده تحديد الصف بشكل فريد (الطالب قد يكون له درجات في عدة مقررات، والمقرر قد يكون له عدة طلاب). معاً، يشكلان تركيبة فريدة.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: Foreign Keys -->
+        <section id="foreign-keys" class="content-section">
+            <h2>6. المفاتيح الخارجية</h2>
+
+            <div class="definition">
+                <h4>تعريف: المفتاح الخارجي (Foreign Key)</h4>
+                <p><strong>المفتاح الخارجي</strong> هو عمود (أو أعمدة) يشير إلى المفتاح الأساسي في جدول آخر. يُنشئ علاقة بين جدولين ويفرض سلامة المرجعية.</p>
+            </div>
+
+            <h3>الصيغة</h3>
+            <div class="code-block">
+<span class="keyword">CREATE TABLE</span> table_name (
+    column1 datatype,
+    column2 datatype,
+    <span class="keyword">FOREIGN KEY</span> (column_name) <span class="keyword">REFERENCES</span> other_table(primary_key)
+);
+            </div>
+
+            <h3>مثال: جدول المقرر مع مفتاح خارجي</h3>
+            <div class="code-block">
+<span class="comment">-- جدول Course يشير إلى جدول Professor</span>
+<span class="keyword">CREATE TABLE</span> Course (
+    Cid     <span class="keyword">INTEGER</span> <span class="keyword">PRIMARY KEY</span>,
+    cname   <span class="keyword">VARCHAR</span>(<span class="number">100</span>),
+    Pid     <span class="keyword">INTEGER</span>,
+    <span class="keyword">FOREIGN KEY</span> (Pid) <span class="keyword">REFERENCES</span> Professor(Pid)
+);
+            </div>
+
+            <div class="properties-grid">
+                <div class="property-card">
+                    <h4>سلامة المرجعية</h4>
+                    <p>يضمن DBMS أن قيم المفتاح الخارجي يجب أن توجد في الجدول المُشار إليه (أو تكون NULL إذا سُمح).</p>
+                </div>
+                <div class="property-card">
+                    <h4>يمنع السجلات اليتيمة</h4>
+                    <p>لا يمكنك إدراج مقرر بمعرف أستاذ غير موجود في جدول Professor.</p>
+                </div>
+            </div>
+
+            <a href="../demos/university_schema_demo.html" class="demo-link">استكشف العرض التوضيحي التفاعلي لمخطط الجامعة</a>
+        </section>
+
+        <!-- Section 7: University Database Schema -->
+        <section id="university-schema" class="content-section">
+            <h2>7. مخطط قاعدة بيانات الجامعة</h2>
+
+            <p>لنبني قاعدة بيانات كاملة مع أربعة جداول مترابطة:</p>
+
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الجدول</th>
+                            <th>المفتاح الأساسي</th>
+                            <th>المفاتيح الخارجية</th>
+                            <th>الوصف</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Student</strong></td>
+                            <td>Sid</td>
+                            <td>-</td>
+                            <td>معلومات الطالب</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Professor</strong></td>
+                            <td>Pid</td>
+                            <td>-</td>
+                            <td>معلومات الأستاذ</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Course</strong></td>
+                            <td>Cid</td>
+                            <td>Pid → Professor</td>
+                            <td>المقرر يدرسه أستاذ</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Marks</strong></td>
+                            <td>Sid + Cid</td>
+                            <td>Sid → Student, Cid → Course</td>
+                            <td>درجات الطلاب في المقررات</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>كود SQL الكامل للمخطط</h3>
+            <div class="code-block">
+<span class="comment">-- 1. إنشاء جدول الطالب</span>
+<span class="keyword">CREATE TABLE</span> Student (
+    Sid     <span class="keyword">INTEGER</span> <span class="keyword">PRIMARY KEY</span>,
+    sname   <span class="keyword">VARCHAR</span>(<span class="number">100</span>),
+    age     <span class="keyword">INTEGER</span>,
+    sex     <span class="keyword">VARCHAR</span>(<span class="number">10</span>)
+);
+
+<span class="comment">-- 2. إنشاء جدول الأستاذ</span>
+<span class="keyword">CREATE TABLE</span> Professor (
+    Pid     <span class="keyword">INTEGER</span> <span class="keyword">PRIMARY KEY</span>,
+    pname   <span class="keyword">VARCHAR</span>(<span class="number">100</span>)
+);
+
+<span class="comment">-- 3. إنشاء جدول المقرر (يشير إلى Professor)</span>
+<span class="keyword">CREATE TABLE</span> Course (
+    Cid     <span class="keyword">INTEGER</span> <span class="keyword">PRIMARY KEY</span>,
+    cname   <span class="keyword">VARCHAR</span>(<span class="number">100</span>),
+    Pid     <span class="keyword">INTEGER</span>,
+    <span class="keyword">FOREIGN KEY</span> (Pid) <span class="keyword">REFERENCES</span> Professor(Pid)
+);
+
+<span class="comment">-- 4. إنشاء جدول الدرجات (يشير إلى Student و Course)</span>
+<span class="keyword">CREATE TABLE</span> Marks (
+    Sid     <span class="keyword">INTEGER</span>,
+    Cid     <span class="keyword">INTEGER</span>,
+    marks   <span class="keyword">INTEGER</span>,
+    <span class="keyword">PRIMARY KEY</span> (Sid, Cid),
+    <span class="keyword">FOREIGN KEY</span> (Sid) <span class="keyword">REFERENCES</span> Student(Sid),
+    <span class="keyword">FOREIGN KEY</span> (Cid) <span class="keyword">REFERENCES</span> Course(Cid)
+);
+            </div>
+
+            <div class="warning-box">
+                <h4>ترتيب الإنشاء مهم!</h4>
+                <p>يجب إنشاء الجداول بالترتيب الصحيح. لا يمكنك الإشارة إلى جدول غير موجود بعد. في هذا المثال:</p>
+                <ol>
+                    <li>Student و Professor (بدون اعتماديات)</li>
+                    <li>Course (يعتمد على Professor)</li>
+                    <li>Marks (يعتمد على Student و Course)</li>
+                </ol>
+            </div>
+
+            <a href="../demos/university_schema_demo.html" class="demo-link">تصور علاقات مخطط الجامعة</a>
+        </section>
+
+        <!-- Section 8: ALTER TABLE -->
+        <section id="alter-table" class="content-section">
+            <h2>8. تعديل الجدول ALTER TABLE</h2>
+
+            <p>عبارة ALTER TABLE تعدل هيكل جدول موجود.</p>
+
+            <h3>إضافة عمود ADD</h3>
+            <div class="code-block">
+<span class="comment">-- إضافة عمود جديد لجدول موجود</span>
+<span class="keyword">ALTER TABLE</span> Student
+<span class="keyword">ADD</span> email <span class="keyword">VARCHAR</span>(<span class="number">100</span>);
+            </div>
+
+            <h3>حذف عمود DROP</h3>
+            <div class="code-block">
+<span class="comment">-- إزالة عمود من جدول</span>
+<span class="keyword">ALTER TABLE</span> Student
+<span class="keyword">DROP COLUMN</span> email;
+            </div>
+
+            <div class="example">
+                <h4>مثال عملي</h4>
+                <div class="code-block">
+<span class="comment">-- إضافة عمود رقم الهاتف لجدول Professor</span>
+<span class="keyword">ALTER TABLE</span> Professor
+<span class="keyword">ADD</span> phone <span class="keyword">VARCHAR</span>(<span class="number">20</span>);
+
+<span class="comment">-- إضافة عمود القسم لجدول Professor</span>
+<span class="keyword">ALTER TABLE</span> Professor
+<span class="keyword">ADD</span> department <span class="keyword">VARCHAR</span>(<span class="number">50</span>);
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <h4>تحذير</h4>
+                <p>حذف الأعمدة يزيل البيانات نهائياً. تأكد من عمل نسخة احتياطية للبيانات المهمة قبل تعديل هياكل الجداول.</p>
+            </div>
+        </section>
+
+        <!-- Section 9: DROP Statements -->
+        <section id="drop-statements" class="content-section">
+            <h2>9. عبارات الحذف DROP</h2>
+
+            <p>عبارات DROP تزيل كائنات قاعدة البيانات نهائياً.</p>
+
+            <h3>حذف جدول DROP TABLE</h3>
+            <div class="code-block">
+<span class="comment">-- إزالة جدول وجميع بياناته</span>
+<span class="keyword">DROP TABLE</span> table_name;
+            </div>
+
+            <h3>حذف قاعدة البيانات DROP DATABASE</h3>
+            <div class="code-block">
+<span class="comment">-- إزالة قاعدة بيانات كاملة</span>
+<span class="keyword">DROP DATABASE</span> database_name;
+            </div>
+
+            <div class="example">
+                <h4>أمثلة</h4>
+                <div class="code-block">
+<span class="comment">-- حذف جدول Marks</span>
+<span class="keyword">DROP TABLE</span> Marks;
+
+<span class="comment">-- حذف قاعدة بيانات University كاملة</span>
+<span class="keyword">DROP DATABASE</span> University;
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <h4>تحذير: إجراء لا رجعة فيه!</h4>
+                <ul>
+                    <li>DROP يحذف الكائن وجميع بياناته نهائياً</li>
+                    <li>لا يوجد "تراجع" لأوامر DROP</li>
+                    <li>لا يمكنك حذف جدول مُشار إليه بمفاتيح خارجية في جداول أخرى</li>
+                    <li>تأكد دائماً من وجود نسخ احتياطية قبل حذف الكائنات</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 10: RENAME TABLE -->
+        <section id="rename-table" class="content-section">
+            <h2>10. إعادة تسمية الجدول RENAME</h2>
+
+            <p>عبارة RENAME تغير اسم جدول موجود.</p>
+
+            <h3>الصيغة</h3>
+            <div class="code-block">
+<span class="keyword">RENAME TABLE</span> old_name <span class="keyword">TO</span> new_name;
+            </div>
+
+            <h3>مثال</h3>
+            <div class="code-block">
+<span class="comment">-- إعادة تسمية جدول Student إلى Students</span>
+<span class="keyword">RENAME TABLE</span> Student <span class="keyword">TO</span> Students;
+
+<span class="comment">-- إعادة تسمية جدول Professor إلى Faculty</span>
+<span class="keyword">RENAME TABLE</span> Professor <span class="keyword">TO</span> Faculty;
+            </div>
+
+            <div class="tip-box">
+                <h4>ملاحظة</h4>
+                <p>عند إعادة تسمية الجداول، تذكر تحديث أي استعلامات أو عروض أو كود تطبيق يشير إلى اسم الجدول القديم.</p>
+            </div>
+        </section>
+
+        <!-- Exercises -->
+        <section id="exercises" class="content-section">
+            <h2>تمارين عملية</h2>
+
+            <div class="review-questions">
+                <h3>جرب هذه العبارات SQL</h3>
+                <ol>
+                    <li>أنشئ قاعدة بيانات باسم "Library"</li>
+                    <li>أنشئ جدول "Book" بأعمدة: BookID (PK)، Title، Author، PublishYear، ISBN</li>
+                    <li>أنشئ جدول "Member" بأعمدة: MemberID (PK)، Name، Email، JoinDate</li>
+                    <li>أنشئ جدول "Borrowing" لتتبع أي عضو استعار أي كتاب (PK مركب مع FKs)</li>
+                    <li>أضف عمود "Phone" لجدول Member</li>
+                    <li>أعد تسمية جدول "Book" إلى "Books"</li>
+                </ol>
+            </div>
+
+            <a href="../demos/ddl_commands_demo.html" class="demo-link">تدرب على أوامر DDL في العرض التوضيحي التفاعلي</a>
+        </section>
+
+        <!-- Review Questions -->
+        <section id="review" class="content-section">
+            <h2>أسئلة المراجعة</h2>
+
+            <div class="review-questions">
+                <h3>اختبر فهمك</h3>
+                <ol>
+                    <li>ماذا تعني DDL وما الأوامر التي تتضمنها؟</li>
+                    <li>ما الفرق بين DDL و DML و DCL؟</li>
+                    <li>اشرح الغرض من المفتاح الأساسي. ما القيود التي يفرضها؟</li>
+                    <li>متى تستخدم مفتاح أساسي مركب؟ أعط مثالاً.</li>
+                    <li>ما هو المفتاح الخارجي وكيف يفرض سلامة المرجعية؟</li>
+                    <li>لماذا ترتيب إنشاء الجداول مهم عند استخدام المفاتيح الخارجية؟</li>
+                    <li>ما الفرق بين DROP TABLE و ALTER TABLE DROP COLUMN؟</li>
+                    <li>اكتب SQL لإنشاء جدول "Employee" بـ: EmpID (PK)، Name، DeptID (FK إلى Department)، Salary</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>الملخص والنقاط الرئيسية</h2>
+
+            <h3>ما تعلمناه</h3>
+            <ol>
+                <li><strong>مكونات SQL:</strong> تتكون SQL من DDL (الهيكل)، DML (البيانات)، و DCL (الصلاحيات).</li>
+
+                <li><strong>CREATE DATABASE/TABLE:</strong> تُستخدم لتعريف قواعد بيانات وجداول جديدة مع أعمدتها وأنواع بياناتها.</li>
+
+                <li><strong>أنواع البيانات:</strong> الأنواع الشائعة تشمل INTEGER، VARCHAR، DATE، و DECIMAL لتخزين أنواع مختلفة من البيانات.</li>
+
+                <li><strong>المفاتيح الأساسية:</strong> تحدد الصفوف بشكل فريد؛ يمكن أن تكون عمود واحد أو مركبة (عدة أعمدة).</li>
+
+                <li><strong>المفاتيح الخارجية:</strong> تُنشئ علاقات بين الجداول وتفرض سلامة المرجعية.</li>
+
+                <li><strong>ALTER TABLE:</strong> تعدل الجداول الموجودة بإضافة أو حذف الأعمدة.</li>
+
+                <li><strong>DROP/RENAME:</strong> تزيل أو تعيد تسمية كائنات قاعدة البيانات (استخدمها بحذر!).</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>المحاضرة القادمة:</strong> لغة معالجة البيانات SQL (DML) - سنتعلم كيفية INSERT وUPDATE وDELETE وSELECT البيانات من الجداول.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="credits">
+            <h2>الاعتمادات</h2>
+            <p>مقرر برمجة قواعد البيانات - COMP 2413</p>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index_ar.html">→ العودة للصفحة الرئيسية</a>
+        </p>
+    </footer>
+</body>
+</html>

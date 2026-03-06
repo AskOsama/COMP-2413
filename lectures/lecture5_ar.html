@@ -1,0 +1,606 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المحاضرة 5: استعلامات SQL الأساسية</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="lecture5.html" class="lang-button" title="Switch to English">English</a>
+    </div>
+
+    <header>
+        <h1>استعلامات SQL الأساسية</h1>
+        <p class="subtitle">المحاضرة 5: كتابة استعلامات SQL الأساسية باستخدام FROM و WHERE و LIKE و ORDER BY</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>المحتويات</h2>
+        <ul>
+            <li><a href="#objectives">أهداف التعلم</a></li>
+            <li><a href="#university-db">مخطط قاعدة بيانات الجامعة</a></li>
+            <li><a href="#from-where">1. جملتا FROM و WHERE</a></li>
+            <li><a href="#string-ops">2. العمليات النصية (LIKE)</a></li>
+            <li><a href="#order-by">3. جملة ORDER BY</a></li>
+            <li><a href="#exercises">تمارين عملية</a></li>
+            <li><a href="#review">أسئلة المراجعة</a></li>
+            <li><a href="#summary">الملخص</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>أهداف التعلم</h2>
+            <p>بنهاية هذه المحاضرة، ستكون قادراً على:</p>
+            <ul>
+                <li>كتابة استعلامات SQL باستخدام جمل SELECT و FROM و WHERE</li>
+                <li>استخدام الروابط المنطقية (AND و OR و NOT) في شروط WHERE</li>
+                <li>تطبيق معاملات المقارنة (&lt; و &lt;= و &gt; و &gt;= و = و &lt;&gt;) في الاستعلامات</li>
+                <li>استخدام معامل LIKE مع أحرف البدل (% و _) لمطابقة النصوص</li>
+                <li>استخدام DISTINCT لإزالة الصفوف المكررة من النتائج</li>
+                <li>ترتيب نتائج الاستعلام باستخدام ORDER BY (تصاعدياً ASC وتنازلياً DESC)</li>
+            </ul>
+        </section>
+
+        <!-- University Database Schema -->
+        <section id="university-db" class="content-section">
+            <h2>مخطط قاعدة بيانات الجامعة</h2>
+
+            <p>طوال هذه المحاضرة، سنستخدم قاعدة بيانات الجامعة التالية المكونة من أربعة جداول مترابطة:</p>
+
+            <h3>جدول الطالب (Student)</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sid</th>
+                            <th>Sname</th>
+                            <th>Age</th>
+                            <th>Sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>Mohamed Al Tamimi</td><td>22</td><td>M</td></tr>
+                        <tr><td>2</td><td>Sarra Al Askar</td><td>21</td><td>F</td></tr>
+                        <tr><td>3</td><td>Munera Al Jomoa</td><td>23</td><td>F</td></tr>
+                        <tr><td>4</td><td>Ali Al Askar</td><td>25</td><td>M</td></tr>
+                        <tr><td>5</td><td>Salah Al Ghamdi</td><td>20</td><td>M</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>جدول الأستاذ (Professor)</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Pid</th>
+                            <th>Pname</th>
+                            <th>Grade</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>Prof. Awartef</td><td>Professor</td></tr>
+                        <tr><td>2</td><td>Dr. Fahd</td><td>Assistant Professor</td></tr>
+                        <tr><td>3</td><td>Dr. Ameera</td><td>Assistant Professor</td></tr>
+                        <tr><td>4</td><td>Miss. Olfa</td><td>Assistant</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>جدول المقرر (Course)</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Cid</th>
+                            <th>Cname</th>
+                            <th>Pid</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>C1</td><td>Programming 2</td><td>3</td></tr>
+                        <tr><td>C2</td><td>Data Structure</td><td>1</td></tr>
+                        <tr><td>C3</td><td>Programming1</td><td>2</td></tr>
+                        <tr><td>C4</td><td>Statistic</td><td>3</td></tr>
+                        <tr><td>C5</td><td>Visual Programming</td><td>2</td></tr>
+                        <tr><td>C6</td><td>Internet Programming</td><td>3</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>جدول الدرجات (Marks)</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sid</th>
+                            <th>Cid</th>
+                            <th>Mark</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>C1</td><td>35</td></tr>
+                        <tr><td>1</td><td>C3</td><td>22</td></tr>
+                        <tr><td>1</td><td>C4</td><td>18</td></tr>
+                        <tr><td>2</td><td>C2</td><td>17</td></tr>
+                        <tr><td>2</td><td>C3</td><td>35</td></tr>
+                        <tr><td>3</td><td>C2</td><td>32</td></tr>
+                        <tr><td>3</td><td>C4</td><td>28</td></tr>
+                        <tr><td>4</td><td>C2</td><td>33</td></tr>
+                        <tr><td>4</td><td>C4</td><td>15</td></tr>
+                        <tr><td>5</td><td>C5</td><td>38</td></tr>
+                        <tr><td>5</td><td>C6</td><td>39</td></tr>
+                        <tr><td>5</td><td>C1</td><td>40</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 1: FROM and WHERE Clauses -->
+        <section id="from-where" class="content-section">
+            <h2>1. جملتا FROM و WHERE</h2>
+
+            <div class="definition">
+                <h4>صيغة استعلام SQL</h4>
+                <p>الاستعلام الأساسي في SQL له البنية التالية:</p>
+                <div class="code-block">
+<span class="keyword">SELECT</span> column1, column2, ...
+<span class="keyword">FROM</span> table_name
+<span class="keyword">WHERE</span> condition;
+                </div>
+                <p>تدعم جملة <strong>WHERE</strong> الروابط المنطقية (<code>AND</code> و <code>OR</code> و <code>NOT</code>) ومعاملات المقارنة (<code>&lt;</code> و <code>&lt;=</code> و <code>&gt;</code> و <code>&gt;=</code> و <code>=</code> و <code>&lt;&gt;</code>).</p>
+            </div>
+
+            <div class="example">
+                <h4>مثال 1: أوجد رقم واسم الطلاب الذكور الذين أعمارهم أكبر من 20</h4>
+                <div class="code-block">
+<span class="keyword">SELECT</span> Sid, Sname
+<span class="keyword">FROM</span> Student
+<span class="keyword">WHERE</span> sex = <span class="string">'M'</span> <span class="keyword">AND</span> age &gt; <span class="number">20</span>;
+                </div>
+            </div>
+
+            <h4>نتيجة الاستعلام</h4>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr><th>Sid</th><th>Sname</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>Mohamed Al Tamimi</td></tr>
+                        <tr><td>4</td><td>Ali Al Askar</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="example">
+                <h4>مثال 2: أوجد رقم واسم جميع الأساتذة المساعدين</h4>
+                <div class="code-block">
+<span class="keyword">SELECT</span> Pid, Pname
+<span class="keyword">FROM</span> Professor
+<span class="keyword">WHERE</span> grade = <span class="string">'Assistant Professor'</span>;
+                </div>
+            </div>
+
+            <h4>نتيجة الاستعلام</h4>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr><th>Pid</th><th>Pname</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>2</td><td>Dr. Fahd</td></tr>
+                        <tr><td>3</td><td>Dr. Ameera</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="example">
+                <h4>مثال 3: أوجد درجة الطالب 3 في المقرر C4</h4>
+                <div class="code-block">
+<span class="keyword">SELECT</span> Mark
+<span class="keyword">FROM</span> Marks
+<span class="keyword">WHERE</span> Sid = <span class="number">3</span> <span class="keyword">AND</span> Cid = <span class="string">'C4'</span>;
+                </div>
+            </div>
+
+            <h4>نتيجة الاستعلام</h4>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr><th>Mark</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>28</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="example">
+                <h4>مثال 4: أوجد رتبة جميع الأساتذة</h4>
+                <div class="code-block">
+<span class="keyword">SELECT</span> Grade
+<span class="keyword">FROM</span> Professor;
+                </div>
+            </div>
+
+            <h4>نتيجة الاستعلام (مع التكرار)</h4>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr><th>Grade</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Professor</td></tr>
+                        <tr><td>Assistant Professor</td></tr>
+                        <tr><td>Assistant Professor</td></tr>
+                        <tr><td>Assistant</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tip-box">
+                <h4>استخدام DISTINCT لإزالة التكرار</h4>
+                <p>لإزالة الصفوف المكررة من النتيجة، استخدم الكلمة المفتاحية <code>DISTINCT</code>:</p>
+                <div class="code-block">
+<span class="keyword">SELECT DISTINCT</span> Grade
+<span class="keyword">FROM</span> Professor;
+                </div>
+            </div>
+
+            <h4>نتيجة الاستعلام (بدون تكرار)</h4>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr><th>Grade</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Professor</td></tr>
+                        <tr><td>Assistant Professor</td></tr>
+                        <tr><td>Assistant</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 2: String Operations -->
+        <section id="string-ops" class="content-section">
+            <h2>2. العمليات النصية (LIKE)</h2>
+
+            <div class="definition">
+                <h4>تعريف: معامل LIKE</h4>
+                <p>تتضمن SQL معامل مطابقة النصوص للمقارنات على السلاسل النصية. يستخدم المعامل <code>LIKE</code> أنماطاً توصف باستخدام حرفين خاصين:</p>
+            </div>
+
+            <div class="concept-cards">
+                <div class="concept-card">
+                    <div class="icon">%</div>
+                    <h4>علامة النسبة المئوية (%)</h4>
+                    <p>تطابق <strong>أي سلسلة فرعية</strong> (بما في ذلك السلسلة الفارغة)</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">_</div>
+                    <h4>الشرطة السفلية (_)</h4>
+                    <p>تطابق <strong>أي حرف واحد</strong></p>
+                </div>
+            </div>
+
+            <div class="example">
+                <h4>مثال 5: أوجد رقم وأسماء الطلاب الذين يحتوي اسمهم على 'ra'</h4>
+                <div class="code-block">
+<span class="keyword">SELECT</span> Sid, Sname
+<span class="keyword">FROM</span> Student
+<span class="keyword">WHERE</span> Sname <span class="keyword">LIKE</span> <span class="string">'%ra%'</span>;
+                </div>
+            </div>
+
+            <h4>نتيجة الاستعلام</h4>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr><th>Sid</th><th>Sname</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>2</td><td>Sarra Al Askar</td></tr>
+                        <tr><td>3</td><td>Munera Al Jomoa</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="example">
+                <h4>مثال 6: أوجد رقم واسم جميع مقررات البرمجة</h4>
+                <div class="code-block">
+<span class="keyword">SELECT</span> Cid, Cname
+<span class="keyword">FROM</span> Course
+<span class="keyword">WHERE</span> Cname <span class="keyword">LIKE</span> <span class="string">'%programming%'</span>;
+                </div>
+            </div>
+
+            <h4>نتيجة الاستعلام</h4>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr><th>Cid</th><th>Cname</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>C1</td><td>Programming 2</td></tr>
+                        <tr><td>C3</td><td>Programming1</td></tr>
+                        <tr><td>C5</td><td>Visual Programming</td></tr>
+                        <tr><td>C6</td><td>Internet Programming</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tip-box">
+                <h4>أمثلة على أنماط LIKE</h4>
+                <div class="table-demo">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>النمط</th>
+                                <th>يطابق</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>'%ing'</code></td>
+                                <td>أي نص ينتهي بـ "ing"</td>
+                            </tr>
+                            <tr>
+                                <td><code>'Pro%'</code></td>
+                                <td>أي نص يبدأ بـ "Pro"</td>
+                            </tr>
+                            <tr>
+                                <td><code>'%gram%'</code></td>
+                                <td>أي نص يحتوي على "gram"</td>
+                            </tr>
+                            <tr>
+                                <td><code>'_r%'</code></td>
+                                <td>أي نص حرفه الثاني "r"</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: ORDER BY Clause -->
+        <section id="order-by" class="content-section">
+            <h2>3. جملة ORDER BY</h2>
+
+            <div class="definition">
+                <h4>تعريف: ORDER BY</h4>
+                <p>جملة <code>ORDER BY</code> ترتب الصفوف في نتيجة الاستعلام بترتيب <strong>تصاعدي</strong> (<code>ASC</code>) أو <strong>تنازلي</strong> (<code>DESC</code>). الترتيب الافتراضي هو تصاعدي.</p>
+            </div>
+
+            <h3>الصيغة</h3>
+            <div class="code-block">
+<span class="keyword">SELECT</span> column1, column2
+<span class="keyword">FROM</span> table_name
+<span class="keyword">WHERE</span> condition
+<span class="keyword">ORDER BY</span> column_name <span class="keyword">ASC</span>|<span class="keyword">DESC</span>;
+            </div>
+
+            <div class="example">
+                <h4>مثال 7: أوجد رقم واسم وعمر الطلاب الذكور مرتبين تنازلياً حسب العمر</h4>
+                <div class="code-block">
+<span class="keyword">SELECT</span> Sid, Sname, Age
+<span class="keyword">FROM</span> Student
+<span class="keyword">WHERE</span> sex = <span class="string">'M'</span>
+<span class="keyword">ORDER BY</span> Age <span class="keyword">DESC</span>;
+                </div>
+            </div>
+
+            <h4>نتيجة الاستعلام</h4>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr><th>Sid</th><th>Sname</th><th>Age</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>4</td><td>Ali Al Askar</td><td>25</td></tr>
+                        <tr><td>1</td><td>Mohamed Al Tamimi</td><td>22</td></tr>
+                        <tr><td>5</td><td>Salah Al Ghamdi</td><td>20</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="key-message">
+                <h4>ASC مقابل DESC</h4>
+                <p><strong>ASC</strong> (تصاعدي) يرتب من الأصغر إلى الأكبر (A-Z، 0-9). <strong>DESC</strong> (تنازلي) يرتب من الأكبر إلى الأصغر (Z-A، 9-0). إذا لم يتم تحديد الترتيب، فإن <code>ASC</code> هو الافتراضي.</p>
+            </div>
+        </section>
+
+        <!-- Practice Exercises -->
+        <section id="exercises" class="content-section">
+            <h2>تمارين عملية</h2>
+
+            <div class="review-questions">
+                <h3>اكتب استعلامات SQL للمهام التالية</h3>
+                <p>باستخدام جداول قاعدة بيانات الجامعة (Student، Professor، Course، Marks):</p>
+                <ol>
+                    <li>
+                        <strong>السؤال 1:</strong> أوجد رقم واسم الطالبات اللواتي أعمارهن أقل من 22
+                        <details>
+                            <summary>عرض الإجابة</summary>
+                            <div class="code-block">
+<span class="keyword">SELECT</span> Sid, Sname
+<span class="keyword">FROM</span> Student
+<span class="keyword">WHERE</span> sex = <span class="string">'F'</span> <span class="keyword">AND</span> age &lt; <span class="number">22</span>;
+                            </div>
+                            <div class="table-demo">
+                                <table>
+                                    <thead><tr><th>Sid</th><th>Sname</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>2</td><td>Sarra Al Askar</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </details>
+                    </li>
+                    <li>
+                        <strong>السؤال 2:</strong> أوجد رقم واسم الطلاب الذين أعمارهم 23 أو أكثر أو الذين يحتوي اسمهم على "Al Askar"
+                        <details>
+                            <summary>عرض الإجابة</summary>
+                            <div class="code-block">
+<span class="keyword">SELECT</span> Sid, Sname
+<span class="keyword">FROM</span> Student
+<span class="keyword">WHERE</span> age &gt;= <span class="number">23</span> <span class="keyword">OR</span> Sname <span class="keyword">LIKE</span> <span class="string">'%Al Askar%'</span>;
+                            </div>
+                            <div class="table-demo">
+                                <table>
+                                    <thead><tr><th>Sid</th><th>Sname</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>2</td><td>Sarra Al Askar</td></tr>
+                                        <tr><td>3</td><td>Munera Al Jomoa</td></tr>
+                                        <tr><td>4</td><td>Ali Al Askar</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </details>
+                    </li>
+                    <li>
+                        <strong>السؤال 3:</strong> أوجد رقم ودرجة الطلاب في المقرر C4 مرتبين تنازلياً حسب الدرجة
+                        <details>
+                            <summary>عرض الإجابة</summary>
+                            <div class="code-block">
+<span class="keyword">SELECT</span> Sid, Mark
+<span class="keyword">FROM</span> Marks
+<span class="keyword">WHERE</span> Cid = <span class="string">'C4'</span>
+<span class="keyword">ORDER BY</span> Mark <span class="keyword">DESC</span>;
+                            </div>
+                            <div class="table-demo">
+                                <table>
+                                    <thead><tr><th>Sid</th><th>Mark</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>3</td><td>28</td></tr>
+                                        <tr><td>1</td><td>18</td></tr>
+                                        <tr><td>4</td><td>15</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </details>
+                    </li>
+                    <li>
+                        <strong>السؤال 4:</strong> أوجد اسم ورقم الأستاذ الذي يدرّس مقرر Programming 2
+                        <details>
+                            <summary>عرض الإجابة</summary>
+                            <div class="code-block">
+<span class="keyword">SELECT</span> Pname, Professor.Pid
+<span class="keyword">FROM</span> Professor, Course
+<span class="keyword">WHERE</span> Cname = <span class="string">'Programming 2'</span>
+  <span class="keyword">AND</span> Professor.Pid = Course.Pid;
+                            </div>
+                            <div class="table-demo">
+                                <table>
+                                    <thead><tr><th>Pname</th><th>Pid</th></tr></thead>
+                                    <tbody>
+                                        <tr><td>Dr. Ameera</td><td>3</td></tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </details>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Review Questions -->
+        <section id="review" class="content-section">
+            <h2>أسئلة المراجعة</h2>
+
+            <div class="review-questions">
+                <h3>أسئلة الاختيار من متعدد</h3>
+
+                <p><strong>السؤال 5:</strong> كم عدد السجلات التي ستظهر في ناتج أمر SQL التالي؟</p>
+                <div class="code-block">
+<span class="keyword">SELECT</span> *
+<span class="keyword">FROM</span> Marks
+<span class="keyword">WHERE</span> Sid = <span class="number">3</span>;
+                </div>
+                <ol type="A">
+                    <li>3</li>
+                    <li><strong>2</strong></li>
+                    <li>4</li>
+                    <li>6</li>
+                </ol>
+
+                <p><strong>السؤال 6:</strong> ما هو الناتج عند تنفيذ أمر SQL التالي؟</p>
+                <div class="code-block">
+<span class="keyword">SELECT</span> Sid, Mark
+<span class="keyword">FROM</span> Marks
+<span class="keyword">WHERE</span> Cid = <span class="string">'C3'</span>;
+                </div>
+                <div class="table-demo">
+                    <table>
+                        <thead>
+                            <tr><th>الخيار</th><th>النتيجة</th></tr>
+                        </thead>
+                        <tbody>
+                            <tr><td>أ)</td><td>Sid: 1, Mark: 35 &amp; Sid: 2, Mark: 23</td></tr>
+                            <tr><td>ب)</td><td>Sid: 2, Mark: 35 &amp; Sid: 4, Mark: 15</td></tr>
+                            <tr><td>ج)</td><td>Sid: 1, Mark: 22 &amp; Sid: 2, Mark: 35 &amp; Sid: 5, Mark: 40</td></tr>
+                            <tr><td><strong>د)</strong></td><td><strong>Sid: 1, Mark: 22 &amp; Sid: 2, Mark: 35</strong></td></tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <p><strong>السؤال 7:</strong> أي استعلام SQL يجد درجة الطالب 1 في المقرر 'C2'؟</p>
+                <ol type="A">
+                    <li><code>SELECT Sid, Mark FROM Marks WHERE Cid='C2';</code></li>
+                    <li><code>SELECT Mark FROM Marks WHERE Cid='C2' AND Sid &lt;&gt; 1;</code></li>
+                    <li><code>SELECT Mark FROM Marks WHERE Cid='C2' OR Sid=1;</code></li>
+                    <li><strong><code>SELECT Mark FROM Marks WHERE Cid='C2' AND Sid=1;</code></strong></li>
+                </ol>
+
+                <p><strong>السؤال 8:</strong> أي استعلام SQL يجد رقم الطالب والدرجات في المقرر 'C4' مرتبة تصاعدياً حسب رقم الطالب؟</p>
+                <ol type="A">
+                    <li><strong><code>SELECT Sid, Mark FROM Marks WHERE Cid='C4' ORDER BY Sid ASC;</code></strong></li>
+                    <li><code>SELECT Sid, Mark FROM Marks WHERE Sid=4 ORDER BY Sid DESC;</code></li>
+                    <li><code>SELECT Sid, Mark FROM Marks WHERE Cid='C4' ORDER BY Sid DESC;</code></li>
+                    <li><code>SELECT Max(Mark) FROM Marks WHERE Cid='C4' ORDER BY Sid ASC;</code></li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>الملخص والنقاط الرئيسية</h2>
+
+            <h3>ما تعلمناه</h3>
+            <ol>
+                <li><strong>بنية استعلام SQL:</strong> الاستعلام الأساسي يستخدم <code>SELECT ... FROM ... WHERE ...</code> لاسترجاع البيانات المصفاة من الجداول.</li>
+
+                <li><strong>جملة WHERE:</strong> تصفي الصفوف باستخدام معاملات المقارنة (<code>=</code> و <code>&lt;&gt;</code> و <code>&gt;</code> و <code>&lt;</code> و <code>&gt;=</code> و <code>&lt;=</code>) والروابط المنطقية (<code>AND</code> و <code>OR</code> و <code>NOT</code>).</li>
+
+                <li><strong>DISTINCT:</strong> يزيل الصفوف المكررة من نتائج الاستعلام باستخدام <code>SELECT DISTINCT</code>.</li>
+
+                <li><strong>العمليات النصية:</strong> معامل <code>LIKE</code> مع <code>%</code> (أي سلسلة فرعية) و <code>_</code> (أي حرف واحد) يمكّن من مطابقة الأنماط على الأعمدة النصية.</li>
+
+                <li><strong>ORDER BY:</strong> يرتب نتائج الاستعلام بترتيب تصاعدي (<code>ASC</code>) أو تنازلي (<code>DESC</code>). الافتراضي هو تصاعدي.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>نظرة مستقبلية:</strong> في المحاضرة القادمة، سنستكشف مواضيع متقدمة في استعلامات SQL تشمل دوال التجميع و GROUP BY و HAVING وأنماط استعلامات أكثر تعقيداً.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="credits">
+            <h2>الاعتمادات</h2>
+            <p>مقرر برمجة قواعد البيانات - COMP 2413</p>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index_ar.html">→ العودة للصفحة الرئيسية</a>
+        </p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المحاضرة 1: مقدمة في قواعد البيانات</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="lecture1.html" class="lang-button" title="Switch to English">English</a>
+    </div>
+
+    <header>
+        <h1>مقدمة في قواعد البيانات</h1>
+        <p class="subtitle">المحاضرة 1: أساسيات إدارة البيانات</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>المحتويات</h2>
+        <ul>
+            <li><a href="#objectives">أهداف التعلم</a></li>
+            <li><a href="#data-vs-info">1. البيانات مقابل المعلومات</a></li>
+            <li><a href="#introducing-db">2. مقدمة في قواعد البيانات</a></li>
+            <li><a href="#dbms">3. نظم إدارة قواعد البيانات (DBMS)</a></li>
+            <li><a href="#design-importance">4. أهمية تصميم قواعد البيانات</a></li>
+            <li><a href="#review">أسئلة المراجعة</a></li>
+            <li><a href="#summary">الملخص</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>أهداف التعلم</h2>
+            <p>بنهاية هذه المحاضرة، ستكون قادراً على:</p>
+            <ul>
+                <li>التمييز بين البيانات والمعلومات</li>
+                <li>تعريف قاعدة البيانات ومكوناتها</li>
+                <li>فهم مفاهيم الكيان والسجل والسمة</li>
+                <li>تحديد مزايا وتكاليف نهج قواعد البيانات</li>
+                <li>شرح ما هو نظام إدارة قواعد البيانات ووظائفه الأساسية</li>
+                <li>إدراك أهمية التصميم الجيد لقواعد البيانات</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: Data vs Information -->
+        <section id="data-vs-info" class="content-section">
+            <h2>1. البيانات مقابل المعلومات</h2>
+
+            <h3>ما هي البيانات؟</h3>
+            <div class="definition">
+                <h4>تعريف: البيانات (Data)</h4>
+                <p><strong>البيانات</strong> هي حقائق خام - حقائق غير معالجة لم يتم تنظيمها أو تحليلها بعد. البيانات بمفردها ليس لها معنى كبير بدون سياق.</p>
+            </div>
+
+            <h3>أنواع البيانات</h3>
+            <div class="db-types-grid">
+                <div class="db-type-card">
+                    <div class="db-type-icon">🔤</div>
+                    <h4>أبجدية رقمية</h4>
+                    <p>نصوص وأرقام مجتمعة</p>
+                    <span class="db-type-desc">أسماء، معرفات، عناوين</span>
+                </div>
+                <div class="db-type-card">
+                    <div class="db-type-icon">🖼️</div>
+                    <h4>صور</h4>
+                    <p>تنسيقات بيانات مرئية</p>
+                    <span class="db-type-desc">صور، رسومات</span>
+                </div>
+                <div class="db-type-card">
+                    <div class="db-type-icon">🔊</div>
+                    <h4>صوت</h4>
+                    <p>تسجيلات صوتية</p>
+                    <span class="db-type-desc">موسيقى، صوت</span>
+                </div>
+                <div class="db-type-card">
+                    <div class="db-type-icon">🎬</div>
+                    <h4>فيديو</h4>
+                    <p>صور متحركة</p>
+                    <span class="db-type-desc">أفلام، مقاطع</span>
+                </div>
+            </div>
+
+            <h3>ما هي المعلومات؟</h3>
+            <div class="definition">
+                <h4>تعريف: المعلومات (Information)</h4>
+                <p><strong>المعلومات</strong> هي بيانات تمت معالجتها أو تنظيمها أو تقديمها في سياق ذي معنى. المعلومات مفيدة لاتخاذ القرارات.</p>
+            </div>
+
+            <h3>مثال على تحويل البيانات</h3>
+            <div class="example">
+                <h4>تحويل البيانات إلى معلومات</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>البيانات الخام</th>
+                            <th>المعلومات المعالجة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>5433333353</code></td>
+                            <td><code>(543) 333-3353</code> - رقم هاتف منسق</td>
+                        </tr>
+                        <tr>
+                            <td><code>19900515</code></td>
+                            <td><code>15 مايو 1990</code> - تاريخ ميلاد</td>
+                        </tr>
+                        <tr>
+                            <td><code>ahmed85riyadh</code></td>
+                            <td>اسم المستخدم: أحمد، مولود 1985، من الرياض</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="key-message">
+                <h4>الفكرة الرئيسية</h4>
+                <p><strong>البيانات + السياق + المعالجة = المعلومات</strong></p>
+                <p>نفس البيانات يمكن أن تصبح معلومات مختلفة حسب كيفية معالجتها والسياق المطبق.</p>
+            </div>
+
+            <a href="../demos/data_vs_info_demo.html" class="demo-link">جرب العرض التوضيحي التفاعلي للبيانات والمعلومات</a>
+        </section>
+
+        <!-- Section 2: Introducing the Database -->
+        <section id="introducing-db" class="content-section">
+            <h2>2. مقدمة في قواعد البيانات</h2>
+
+            <div class="definition">
+                <h4>تعريف: قاعدة البيانات (Database)</h4>
+                <p><strong>قاعدة البيانات</strong> هي مجموعة من البيانات المترابطة المنظمة بطريقة تسمح بالتخزين والاسترجاع والإدارة بكفاءة. وهي تمثل جانباً من العالم الحقيقي (العالم المصغر).</p>
+            </div>
+
+            <h3>مفاهيم قواعد البيانات الأساسية</h3>
+            <div class="concept-cards">
+                <div class="concept-card">
+                    <div class="icon">👤</div>
+                    <h4>الكيان (Entity)</h4>
+                    <p>كائن مميز نخزن بيانات عنه. أمثلة: شخص، كتاب، طالب، منتج</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">📝</div>
+                    <h4>السجل (Record)</h4>
+                    <p>مجموعة من عناصر البيانات المترابطة عن مثيل كيان واحد. يسمى أيضاً صف أو tuple.</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">🏷️</div>
+                    <h4>السمة (Attribute)</h4>
+                    <p>خاصية أو صفة للكيان. أمثلة: الاسم، العمر، البريد الإلكتروني، السعر</p>
+                </div>
+            </div>
+
+            <h3>تمثيل الجدول</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="highlight-attribute">رقم الطالب</th>
+                            <th class="highlight-attribute">الاسم</th>
+                            <th class="highlight-attribute">البريد الإلكتروني</th>
+                            <th class="highlight-attribute">التخصص</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="highlight-record">
+                            <td>1001</td>
+                            <td>أحمد علي</td>
+                            <td>ahmed@email.com</td>
+                            <td>علوم الحاسب</td>
+                        </tr>
+                        <tr>
+                            <td>1002</td>
+                            <td>سارة محمد</td>
+                            <td>sara@email.com</td>
+                            <td>نظم المعلومات</td>
+                        </tr>
+                        <tr>
+                            <td>1003</td>
+                            <td>عمر حسن</td>
+                            <td>omar@email.com</td>
+                            <td>علوم الحاسب</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="diagram-note">الجدول = الكيان | الأعمدة = السمات | الصفوف = السجلات</p>
+            </div>
+
+            <h3>مزايا نهج قواعد البيانات</h3>
+            <div class="advantages-grid">
+                <div class="advantage-card">
+                    <h4>1. تقليل تكرار البيانات</h4>
+                    <p>يزيل البيانات المكررة بتخزين المعلومات في مكان واحد</p>
+                </div>
+                <div class="advantage-card">
+                    <h4>2. تحسين سلامة البيانات</h4>
+                    <p>يضمن دقة واتساق البيانات من خلال القيود</p>
+                </div>
+                <div class="advantage-card">
+                    <h4>3. مشاركة البيانات</h4>
+                    <p>يمكن لعدة مستخدمين الوصول لنفس البيانات في وقت واحد</p>
+                </div>
+                <div class="advantage-card">
+                    <h4>4. أمان البيانات</h4>
+                    <p>ضوابط الوصول تحمي المعلومات الحساسة</p>
+                </div>
+                <div class="advantage-card">
+                    <h4>5. استقلالية البيانات</h4>
+                    <p>التطبيقات معزولة عن التغييرات الفيزيائية للبيانات</p>
+                </div>
+                <div class="advantage-card">
+                    <h4>6. الوصول الفعال للبيانات</h4>
+                    <p>استعلامات محسنة وفهرسة لاسترجاع سريع</p>
+                </div>
+                <div class="advantage-card">
+                    <h4>7. النسخ الاحتياطي والاستعادة</h4>
+                    <p>آليات مدمجة للحماية من فقدان البيانات</p>
+                </div>
+                <div class="advantage-card">
+                    <h4>8. الوصول المتزامن</h4>
+                    <p>التعامل مع عدة مستخدمين دون تعارضات</p>
+                </div>
+                <div class="advantage-card">
+                    <h4>9. تحسين اتخاذ القرارات</h4>
+                    <p>يوفر بيانات منظمة للتحليل والتقارير</p>
+                </div>
+                <div class="advantage-card">
+                    <h4>10. فرض المعايير</h4>
+                    <p>يضمن تنسيقات بيانات واصطلاحات تسمية متسقة</p>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <h4>التكاليف والمخاطر</h4>
+                <ul>
+                    <li><strong>التكلفة الأولية:</strong> نفقات البرمجيات والأجهزة والتدريب</li>
+                    <li><strong>التعقيد:</strong> يتطلب مديرين مهرة</li>
+                    <li><strong>عبء الأداء:</strong> قد يكون أبطأ للتطبيقات البسيطة</li>
+                    <li><strong>نقطة فشل واحدة:</strong> تعطل قاعدة البيانات يؤثر على جميع التطبيقات</li>
+                </ul>
+            </div>
+
+            <h3>قاموس البيانات</h3>
+            <div class="definition">
+                <p><strong>قاموس البيانات</strong> (أو مستودع البيانات الوصفية) يحتوي على معلومات حول هيكل قاعدة البيانات - أوصاف الجداول والأعمدة وأنواع البيانات والقيود والعلاقات.</p>
+            </div>
+
+            <h3>مدير قاعدة البيانات (DBA)</h3>
+            <div class="definition">
+                <p><strong>مدير قاعدة البيانات</strong> مسؤول عن إدارة نظام قاعدة البيانات، بما في ذلك:</p>
+                <ul>
+                    <li>تصميم وتنفيذ قاعدة البيانات</li>
+                    <li>الأمان والتحكم في الوصول</li>
+                    <li>إجراءات النسخ الاحتياطي والاستعادة</li>
+                    <li>مراقبة الأداء وضبطه</li>
+                    <li>دعم المستخدمين والتدريب</li>
+                </ul>
+            </div>
+
+            <h3>نماذج إدخال البيانات</h3>
+            <p>توفر النماذج واجهة سهلة الاستخدام لإدخال البيانات في قاعدة البيانات. يمكن أن تشمل:</p>
+            <ul>
+                <li>التحقق من صحة الإدخال لضمان جودة البيانات</li>
+                <li>قوائم منسدلة للقيم المتسقة</li>
+                <li>حسابات تلقائية</li>
+                <li>نصوص مساعدة وتعليمات</li>
+            </ul>
+
+            <a href="../demos/database_concepts_demo.html" class="demo-link">استكشف العرض التوضيحي التفاعلي لمفاهيم قواعد البيانات</a>
+        </section>
+
+        <!-- Section 3: DBMS -->
+        <section id="dbms" class="content-section">
+            <h2>3. نظم إدارة قواعد البيانات (DBMS)</h2>
+
+            <h3>السياق التاريخي</h3>
+            <p>قبل قواعد البيانات، كانت البيانات تُخزن في ملفات مسطحة مع قيود كثيرة:</p>
+            <ul>
+                <li>تكرار البيانات وعدم الاتساق</li>
+                <li>صعوبة الوصول للبيانات</li>
+                <li>عزل البيانات</li>
+                <li>مشاكل السلامة</li>
+                <li>عدم وجود وصول متزامن</li>
+            </ul>
+
+            <div class="definition">
+                <h4>تعريف: نظام إدارة قواعد البيانات (DBMS)</h4>
+                <p><strong>نظام إدارة قواعد البيانات</strong> هو برنامج يمكّن المستخدمين من إنشاء وصيانة والتحكم في الوصول لقواعد البيانات. يعمل كواجهة بين المستخدمين/التطبيقات والبيانات المخزنة.</p>
+            </div>
+
+            <h3>وظائف DBMS الأساسية</h3>
+            <div class="properties-grid">
+                <div class="property-card">
+                    <h4>الإنشاء (Create)</h4>
+                    <p>تعريف هيكل قاعدة البيانات والجداول والعلاقات والقيود</p>
+                </div>
+                <div class="property-card">
+                    <h4>التخزين (Store)</h4>
+                    <p>إدراج وصيانة البيانات بطريقة منظمة</p>
+                </div>
+                <div class="property-card">
+                    <h4>التنظيم (Organize)</h4>
+                    <p>هيكلة البيانات منطقياً مع الجداول والفهارس والعروض</p>
+                </div>
+                <div class="property-card">
+                    <h4>الاسترجاع (Retrieve)</h4>
+                    <p>الاستعلام واستخراج البيانات بكفاءة باستخدام SQL</p>
+                </div>
+            </div>
+
+            <h3>أمثلة على نظم DBMS الشائعة</h3>
+            <div class="dbms-grid">
+                <div class="dbms-card">
+                    <div class="dbms-icon">🐬</div>
+                    <h4>MySQL</h4>
+                    <p>مفتوح المصدر، يستخدم على نطاق واسع لتطبيقات الويب</p>
+                    <span class="dbms-type">علائقي</span>
+                </div>
+                <div class="dbms-card">
+                    <div class="dbms-icon">🔶</div>
+                    <h4>Oracle</h4>
+                    <p>مستوى المؤسسات، ميزات قوية</p>
+                    <span class="dbms-type">علائقي</span>
+                </div>
+                <div class="dbms-card">
+                    <div class="dbms-icon">🔷</div>
+                    <h4>SQL Server</h4>
+                    <p>قاعدة بيانات مايكروسوفت للمؤسسات</p>
+                    <span class="dbms-type">علائقي</span>
+                </div>
+                <div class="dbms-card">
+                    <div class="dbms-icon">📊</div>
+                    <h4>MS Access</h4>
+                    <p>قاعدة بيانات سطح المكتب للتطبيقات الصغيرة</p>
+                    <span class="dbms-type">علائقي</span>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <h4>ملاحظة مهمة</h4>
+                <p><strong>مايكروسوفت إكسل ليس نظام DBMS!</strong> بينما يمكن لإكسل تخزين البيانات في صفوف وأعمدة، فإنه يفتقر للميزات الأساسية لنظام DBMS الحقيقي مثل فرض سلامة البيانات، والتحكم في الوصول المتزامن، وقدرات الاستعلام بـ SQL.</p>
+            </div>
+
+            <h3>مقدمة في SQL</h3>
+            <div class="definition">
+                <h4>تعريف: SQL</h4>
+                <p><strong>SQL (لغة الاستعلام الهيكلية)</strong> هي اللغة المعيارية للتفاعل مع قواعد البيانات العلائقية. تتيح لك إنشاء البيانات والاستعلام عنها وتحديثها وإدارتها.</p>
+            </div>
+
+            <div class="code-block">
+<span class="comment">-- مثال على استعلام SQL</span>
+<span class="keyword">SELECT</span> Name, Email
+<span class="keyword">FROM</span> Students
+<span class="keyword">WHERE</span> Major = <span class="string">'Computer Science'</span>;
+            </div>
+
+            <p>تنقسم SQL إلى عدة فئات:</p>
+            <ul>
+                <li><strong>DDL (لغة تعريف البيانات):</strong> CREATE، ALTER، DROP</li>
+                <li><strong>DML (لغة معالجة البيانات):</strong> SELECT، INSERT، UPDATE، DELETE</li>
+                <li><strong>DCL (لغة التحكم في البيانات):</strong> GRANT، REVOKE</li>
+            </ul>
+        </section>
+
+        <!-- Section 4: Importance of Database Design -->
+        <section id="design-importance" class="content-section">
+            <h2>4. أهمية تصميم قواعد البيانات</h2>
+
+            <p>تصميم قواعد البيانات هو عملية إنتاج نموذج بيانات مفصل لقاعدة البيانات. جودة التصميم تؤثر مباشرة على نجاح النظام.</p>
+
+            <div class="properties-grid">
+                <div class="property-card">
+                    <h4>التصميم الجيد</h4>
+                    <ul>
+                        <li>ينتج نتائج صحيحة</li>
+                        <li>أداء استعلام سريع</li>
+                        <li>سهل الصيانة والتعديل</li>
+                        <li>تكرار بيانات أقل</li>
+                        <li>يفرض سلامة البيانات</li>
+                    </ul>
+                </div>
+                <div class="property-card">
+                    <h4>التصميم السيء</h4>
+                    <ul>
+                        <li>نتائج غير صحيحة أو غير متسقة</li>
+                        <li>أداء بطيء</li>
+                        <li>صعب التعديل</li>
+                        <li>تكرار مفرط</li>
+                        <li>شذوذات في البيانات</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <h4>المبدأ الأساسي</h4>
+                <p>قاعدة البيانات المصممة جيداً هي أساس أي نظام معلومات ناجح. الوقت المستثمر في التصميم الصحيح يُجزي عدة مرات أثناء التطوير والصيانة.</p>
+            </div>
+        </section>
+
+        <!-- Review Questions -->
+        <section id="review" class="content-section">
+            <h2>أسئلة المراجعة</h2>
+
+            <div class="review-questions">
+                <h3>اختبر فهمك</h3>
+                <ol>
+                    <li>ما الفرق بين البيانات والمعلومات؟ أعط مثالاً.</li>
+                    <li>عرّف المصطلحات التالية: الكيان، السجل، السمة</li>
+                    <li>اذكر خمس مزايا لاستخدام نهج قواعد البيانات.</li>
+                    <li>ما هو نظام DBMS وما هي وظائفه الأساسية؟</li>
+                    <li>لماذا لا يُعتبر إكسل نظام DBMS؟</li>
+                    <li>اشرح لماذا التصميم الجيد لقواعد البيانات مهم.</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>الملخص والنقاط الرئيسية</h2>
+
+            <h3>ما تعلمناه</h3>
+            <ol>
+                <li><strong>البيانات مقابل المعلومات:</strong> البيانات هي حقائق خام؛ المعلومات هي بيانات معالجة توفر معنى وسياقاً.</li>
+
+                <li><strong>أساسيات قواعد البيانات:</strong> قاعدة البيانات هي مجموعة منظمة من البيانات المترابطة، تتكون من كيانات (جداول) وسجلات (صفوف) وسمات (أعمدة).</li>
+
+                <li><strong>مزايا قواعد البيانات:</strong> يوفر نهج قواعد البيانات تقليل التكرار وتحسين السلامة وأمان أفضل ومشاركة بيانات فعالة.</li>
+
+                <li><strong>دور DBMS:</strong> توفر نظم إدارة قواعد البيانات أدوات لإنشاء وتخزين وتنظيم واسترجاع البيانات بكفاءة.</li>
+
+                <li><strong>مقدمة SQL:</strong> SQL هي اللغة المعيارية للعمل مع قواعد البيانات العلائقية.</li>
+
+                <li><strong>التصميم مهم:</strong> التصميم الجيد لقواعد البيانات حاسم لنجاح النظام، يؤثر على الأداء وقابلية الصيانة وجودة البيانات.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>المحاضرة القادمة:</strong> لغة تعريف البيانات SQL (DDL) - سنتعلم كيفية إنشاء قواعد البيانات والجداول باستخدام أوامر SQL.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="credits">
+            <h2>الاعتمادات</h2>
+            <p>مقرر برمجة قواعد البيانات - COMP 2413</p>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index_ar.html">→ العودة للصفحة الرئيسية</a>
+        </p>
+    </footer>
+</body>
+</html>

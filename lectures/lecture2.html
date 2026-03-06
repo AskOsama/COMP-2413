@@ -1,0 +1,610 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture 2: SQL Data Definition Language (DDL)</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="lecture2_ar.html" class="lang-button" title="Switch to Arabic">العربية</a>
+    </div>
+
+    <header>
+        <h1>SQL Data Definition Language</h1>
+        <p class="subtitle">Lecture 2: Creating and Managing Database Structures</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>Contents</h2>
+        <ul>
+            <li><a href="#objectives">Learning Objectives</a></li>
+            <li><a href="#sql-overview">1. SQL Overview</a></li>
+            <li><a href="#sql-components">2. SQL Components</a></li>
+            <li><a href="#create-database">3. CREATE DATABASE</a></li>
+            <li><a href="#create-table">4. CREATE TABLE</a></li>
+            <li><a href="#primary-keys">5. Primary Keys</a></li>
+            <li><a href="#foreign-keys">6. Foreign Keys</a></li>
+            <li><a href="#university-schema">7. University Database Schema</a></li>
+            <li><a href="#alter-table">8. ALTER TABLE</a></li>
+            <li><a href="#drop-statements">9. DROP Statements</a></li>
+            <li><a href="#rename-table">10. RENAME TABLE</a></li>
+            <li><a href="#exercises">Exercises</a></li>
+            <li><a href="#review">Review Questions</a></li>
+            <li><a href="#summary">Summary</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <p>By the end of this lecture, you will be able to:</p>
+            <ul>
+                <li>Understand the role of SQL in relational database systems</li>
+                <li>Identify the three main components of SQL (DDL, DML, DCL)</li>
+                <li>Create databases and tables using CREATE statements</li>
+                <li>Define appropriate data types for table columns</li>
+                <li>Implement primary keys (single and composite)</li>
+                <li>Establish foreign key relationships between tables</li>
+                <li>Modify table structures using ALTER TABLE</li>
+                <li>Remove database objects using DROP statements</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: SQL Overview -->
+        <section id="sql-overview" class="content-section">
+            <h2>1. SQL Overview</h2>
+
+            <div class="definition">
+                <h4>Definition: SQL</h4>
+                <p><strong>SQL (Structured Query Language)</strong> is the standard language for managing and manipulating relational databases. It allows you to create, modify, query, and control access to data stored in a relational database management system (RDBMS).</p>
+            </div>
+
+            <h3>Characteristics of Relational DBMS</h3>
+            <div class="concept-cards">
+                <div class="concept-card">
+                    <div class="icon">📊</div>
+                    <h4>Data in Tables</h4>
+                    <p>Data is organized into tables (relations) with rows and columns</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">🔗</div>
+                    <h4>Relationships</h4>
+                    <p>Tables can be related through common columns (keys)</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">📝</div>
+                    <h4>SQL Language</h4>
+                    <p>Standard language for all relational database operations</p>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <h4>Why SQL?</h4>
+                <p>SQL is a <strong>declarative language</strong> - you describe WHAT you want, not HOW to get it. The DBMS optimizes the execution plan automatically.</p>
+            </div>
+        </section>
+
+        <!-- Section 2: SQL Components -->
+        <section id="sql-components" class="content-section">
+            <h2>2. SQL Components</h2>
+
+            <p>SQL is divided into three main categories based on the type of operations:</p>
+
+            <div class="concept-cards">
+                <div class="concept-card">
+                    <div class="icon">🏗️</div>
+                    <h4>DDL - Data Definition Language</h4>
+                    <p class="arabic">(لغة تعريف البيانات)</p>
+                    <p>Defines database structure</p>
+                    <ul>
+                        <li><code>CREATE</code> - Create objects</li>
+                        <li><code>ALTER</code> - Modify objects</li>
+                        <li><code>DROP</code> - Delete objects</li>
+                        <li><code>RENAME</code> - Rename objects</li>
+                    </ul>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">📝</div>
+                    <h4>DML - Data Manipulation Language</h4>
+                    <p class="arabic">(لغة معالجة البيانات)</p>
+                    <p>Works with data in tables</p>
+                    <ul>
+                        <li><code>SELECT</code> - Query data</li>
+                        <li><code>INSERT</code> - Add data</li>
+                        <li><code>UPDATE</code> - Modify data</li>
+                        <li><code>DELETE</code> - Remove data</li>
+                    </ul>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">🔐</div>
+                    <h4>DCL - Data Control Language</h4>
+                    <p class="arabic">(لغة التحكم في البيانات)</p>
+                    <p>Controls access permissions</p>
+                    <ul>
+                        <li><code>GRANT</code> - Give permissions</li>
+                        <li><code>REVOKE</code> - Remove permissions</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <h4>This Lecture's Focus</h4>
+                <p>In this lecture, we focus on <strong>DDL (Data Definition Language)</strong> - the commands used to create and manage database structures.</p>
+            </div>
+        </section>
+
+        <!-- Section 3: CREATE DATABASE -->
+        <section id="create-database" class="content-section">
+            <h2>3. CREATE DATABASE</h2>
+
+            <p>Before creating tables, you must first create a database to contain them.</p>
+
+            <h3>Syntax</h3>
+            <div class="code-block">
+<span class="keyword">CREATE DATABASE</span> database_name;
+            </div>
+
+            <h3>Example</h3>
+            <div class="code-block">
+<span class="comment">-- Create a new database called University</span>
+<span class="keyword">CREATE DATABASE</span> University;
+            </div>
+
+            <h3>USE Statement</h3>
+            <p>After creating a database, you must select it before creating tables:</p>
+            <div class="code-block">
+<span class="comment">-- Select the University database</span>
+<span class="keyword">USE</span> University;
+            </div>
+
+            <div class="example">
+                <h4>Complete Example</h4>
+                <div class="code-block">
+<span class="comment">-- Step 1: Create the database</span>
+<span class="keyword">CREATE DATABASE</span> University;
+
+<span class="comment">-- Step 2: Select the database to use</span>
+<span class="keyword">USE</span> University;
+
+<span class="comment">-- Now you can create tables in this database</span>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: CREATE TABLE -->
+        <section id="create-table" class="content-section">
+            <h2>4. CREATE TABLE</h2>
+
+            <p>The CREATE TABLE statement defines a new table with its columns and data types.</p>
+
+            <h3>Basic Syntax</h3>
+            <div class="code-block">
+<span class="keyword">CREATE TABLE</span> table_name (
+    column1 datatype,
+    column2 datatype,
+    column3 datatype,
+    ...
+);
+            </div>
+
+            <h3>Common Data Types</h3>
+            <div class="db-types-grid">
+                <div class="db-type-card">
+                    <div class="db-type-icon">🔢</div>
+                    <h4>INTEGER / INT</h4>
+                    <p>Whole numbers</p>
+                    <span class="db-type-desc">Age, Quantity, ID</span>
+                </div>
+                <div class="db-type-card">
+                    <div class="db-type-icon">🔤</div>
+                    <h4>VARCHAR(n)</h4>
+                    <p>Variable-length text up to n characters</p>
+                    <span class="db-type-desc">Names, Emails, Addresses</span>
+                </div>
+                <div class="db-type-card">
+                    <div class="db-type-icon">📅</div>
+                    <h4>DATE</h4>
+                    <p>Date values (YYYY-MM-DD)</p>
+                    <span class="db-type-desc">Birthdate, Hire Date</span>
+                </div>
+                <div class="db-type-card">
+                    <div class="db-type-icon">💰</div>
+                    <h4>DECIMAL(p,s)</h4>
+                    <p>Precise decimal numbers</p>
+                    <span class="db-type-desc">Price, Salary, GPA</span>
+                </div>
+            </div>
+
+            <h3>Example: Basic Table</h3>
+            <div class="code-block">
+<span class="comment">-- Create a simple authors table</span>
+<span class="keyword">CREATE TABLE</span> authors (
+    author_id   <span class="keyword">INTEGER</span>,
+    first_name  <span class="keyword">VARCHAR</span>(<span class="number">50</span>),
+    last_name   <span class="keyword">VARCHAR</span>(<span class="number">50</span>),
+    birth_date  <span class="keyword">DATE</span>
+);
+            </div>
+
+            <div class="warning-box">
+                <h4>Important Notes</h4>
+                <ul>
+                    <li>Table and column names should be descriptive</li>
+                    <li>Choose appropriate data types for each column</li>
+                    <li>VARCHAR size should accommodate the maximum expected length</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 5: Primary Keys -->
+        <section id="primary-keys" class="content-section">
+            <h2>5. Primary Keys</h2>
+
+            <div class="definition">
+                <h4>Definition: Primary Key</h4>
+                <p>A <strong>primary key</strong> is a column (or combination of columns) that uniquely identifies each row in a table. Primary key values must be unique and cannot be NULL.</p>
+            </div>
+
+            <h3>Single Column Primary Key</h3>
+            <div class="code-block">
+<span class="comment">-- Method 1: Inline definition</span>
+<span class="keyword">CREATE TABLE</span> Student (
+    Sid     <span class="keyword">INTEGER</span> <span class="keyword">PRIMARY KEY</span>,
+    sname   <span class="keyword">VARCHAR</span>(<span class="number">100</span>),
+    age     <span class="keyword">INTEGER</span>,
+    sex     <span class="keyword">VARCHAR</span>(<span class="number">10</span>)
+);
+            </div>
+
+            <div class="code-block">
+<span class="comment">-- Method 2: Constraint at the end</span>
+<span class="keyword">CREATE TABLE</span> Student (
+    Sid     <span class="keyword">INTEGER</span>,
+    sname   <span class="keyword">VARCHAR</span>(<span class="number">100</span>),
+    age     <span class="keyword">INTEGER</span>,
+    sex     <span class="keyword">VARCHAR</span>(<span class="number">10</span>),
+    <span class="keyword">PRIMARY KEY</span> (Sid)
+);
+            </div>
+
+            <h3>Composite Primary Key</h3>
+            <p>When a single column cannot uniquely identify a row, you can use multiple columns together:</p>
+
+            <div class="code-block">
+<span class="comment">-- Composite primary key using two columns</span>
+<span class="keyword">CREATE TABLE</span> Marks (
+    Sid     <span class="keyword">INTEGER</span>,
+    Cid     <span class="keyword">INTEGER</span>,
+    marks   <span class="keyword">INTEGER</span>,
+    <span class="keyword">PRIMARY KEY</span> (Sid, Cid)
+);
+            </div>
+
+            <div class="key-message">
+                <h4>Key Insight</h4>
+                <p>In the Marks table, neither Sid nor Cid alone can uniquely identify a row (a student can have marks in multiple courses, and a course can have multiple students). Together, they form a unique combination.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: Foreign Keys -->
+        <section id="foreign-keys" class="content-section">
+            <h2>6. Foreign Keys</h2>
+
+            <div class="definition">
+                <h4>Definition: Foreign Key</h4>
+                <p>A <strong>foreign key</strong> is a column (or columns) that references the primary key of another table. It establishes a relationship between two tables and enforces referential integrity.</p>
+            </div>
+
+            <h3>Syntax</h3>
+            <div class="code-block">
+<span class="keyword">CREATE TABLE</span> table_name (
+    column1 datatype,
+    column2 datatype,
+    <span class="keyword">FOREIGN KEY</span> (column_name) <span class="keyword">REFERENCES</span> other_table(primary_key)
+);
+            </div>
+
+            <h3>Example: Course Table with Foreign Key</h3>
+            <div class="code-block">
+<span class="comment">-- Course table references Professor table</span>
+<span class="keyword">CREATE TABLE</span> Course (
+    Cid     <span class="keyword">INTEGER</span> <span class="keyword">PRIMARY KEY</span>,
+    cname   <span class="keyword">VARCHAR</span>(<span class="number">100</span>),
+    Pid     <span class="keyword">INTEGER</span>,
+    <span class="keyword">FOREIGN KEY</span> (Pid) <span class="keyword">REFERENCES</span> Professor(Pid)
+);
+            </div>
+
+            <div class="properties-grid">
+                <div class="property-card">
+                    <h4>Referential Integrity</h4>
+                    <p>The DBMS ensures that foreign key values must exist in the referenced table (or be NULL if allowed).</p>
+                </div>
+                <div class="property-card">
+                    <h4>Prevents Orphan Records</h4>
+                    <p>You cannot insert a course with a professor ID that doesn't exist in the Professor table.</p>
+                </div>
+            </div>
+
+            <a href="../demos/university_schema_demo.html" class="demo-link">Explore the University Schema Interactive Demo</a>
+        </section>
+
+        <!-- Section 7: University Database Schema -->
+        <section id="university-schema" class="content-section">
+            <h2>7. University Database Schema</h2>
+
+            <p>Let's build a complete database with four related tables:</p>
+
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Table</th>
+                            <th>Primary Key</th>
+                            <th>Foreign Keys</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>Student</strong></td>
+                            <td>Sid</td>
+                            <td>-</td>
+                            <td>Student information</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Professor</strong></td>
+                            <td>Pid</td>
+                            <td>-</td>
+                            <td>Professor information</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Course</strong></td>
+                            <td>Cid</td>
+                            <td>Pid → Professor</td>
+                            <td>Course taught by professor</td>
+                        </tr>
+                        <tr>
+                            <td><strong>Marks</strong></td>
+                            <td>Sid + Cid</td>
+                            <td>Sid → Student, Cid → Course</td>
+                            <td>Student grades in courses</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Complete Schema SQL</h3>
+            <div class="code-block">
+<span class="comment">-- 1. Create the Student table</span>
+<span class="keyword">CREATE TABLE</span> Student (
+    Sid     <span class="keyword">INTEGER</span> <span class="keyword">PRIMARY KEY</span>,
+    sname   <span class="keyword">VARCHAR</span>(<span class="number">100</span>),
+    age     <span class="keyword">INTEGER</span>,
+    sex     <span class="keyword">VARCHAR</span>(<span class="number">10</span>)
+);
+
+<span class="comment">-- 2. Create the Professor table</span>
+<span class="keyword">CREATE TABLE</span> Professor (
+    Pid     <span class="keyword">INTEGER</span> <span class="keyword">PRIMARY KEY</span>,
+    pname   <span class="keyword">VARCHAR</span>(<span class="number">100</span>)
+);
+
+<span class="comment">-- 3. Create the Course table (references Professor)</span>
+<span class="keyword">CREATE TABLE</span> Course (
+    Cid     <span class="keyword">INTEGER</span> <span class="keyword">PRIMARY KEY</span>,
+    cname   <span class="keyword">VARCHAR</span>(<span class="number">100</span>),
+    Pid     <span class="keyword">INTEGER</span>,
+    <span class="keyword">FOREIGN KEY</span> (Pid) <span class="keyword">REFERENCES</span> Professor(Pid)
+);
+
+<span class="comment">-- 4. Create the Marks table (references Student and Course)</span>
+<span class="keyword">CREATE TABLE</span> Marks (
+    Sid     <span class="keyword">INTEGER</span>,
+    Cid     <span class="keyword">INTEGER</span>,
+    marks   <span class="keyword">INTEGER</span>,
+    <span class="keyword">PRIMARY KEY</span> (Sid, Cid),
+    <span class="keyword">FOREIGN KEY</span> (Sid) <span class="keyword">REFERENCES</span> Student(Sid),
+    <span class="keyword">FOREIGN KEY</span> (Cid) <span class="keyword">REFERENCES</span> Course(Cid)
+);
+            </div>
+
+            <div class="warning-box">
+                <h4>Creation Order Matters!</h4>
+                <p>Tables must be created in the correct order. You cannot reference a table that doesn't exist yet. In this example:</p>
+                <ol>
+                    <li>Student and Professor (no dependencies)</li>
+                    <li>Course (depends on Professor)</li>
+                    <li>Marks (depends on Student and Course)</li>
+                </ol>
+            </div>
+
+            <a href="../demos/university_schema_demo.html" class="demo-link">Visualize the University Schema Relationships</a>
+        </section>
+
+        <!-- Section 8: ALTER TABLE -->
+        <section id="alter-table" class="content-section">
+            <h2>8. ALTER TABLE</h2>
+
+            <p>The ALTER TABLE statement modifies an existing table's structure.</p>
+
+            <h3>ADD Column</h3>
+            <div class="code-block">
+<span class="comment">-- Add a new column to an existing table</span>
+<span class="keyword">ALTER TABLE</span> Student
+<span class="keyword">ADD</span> email <span class="keyword">VARCHAR</span>(<span class="number">100</span>);
+            </div>
+
+            <h3>DROP Column</h3>
+            <div class="code-block">
+<span class="comment">-- Remove a column from a table</span>
+<span class="keyword">ALTER TABLE</span> Student
+<span class="keyword">DROP COLUMN</span> email;
+            </div>
+
+            <div class="example">
+                <h4>Practical Example</h4>
+                <div class="code-block">
+<span class="comment">-- Add phone number column to Professor table</span>
+<span class="keyword">ALTER TABLE</span> Professor
+<span class="keyword">ADD</span> phone <span class="keyword">VARCHAR</span>(<span class="number">20</span>);
+
+<span class="comment">-- Add department column to Professor table</span>
+<span class="keyword">ALTER TABLE</span> Professor
+<span class="keyword">ADD</span> department <span class="keyword">VARCHAR</span>(<span class="number">50</span>);
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <h4>Caution</h4>
+                <p>Dropping columns permanently removes data. Make sure to backup important data before modifying table structures.</p>
+            </div>
+        </section>
+
+        <!-- Section 9: DROP Statements -->
+        <section id="drop-statements" class="content-section">
+            <h2>9. DROP Statements</h2>
+
+            <p>DROP statements permanently remove database objects.</p>
+
+            <h3>DROP TABLE</h3>
+            <div class="code-block">
+<span class="comment">-- Remove a table and all its data</span>
+<span class="keyword">DROP TABLE</span> table_name;
+            </div>
+
+            <h3>DROP DATABASE</h3>
+            <div class="code-block">
+<span class="comment">-- Remove an entire database</span>
+<span class="keyword">DROP DATABASE</span> database_name;
+            </div>
+
+            <div class="example">
+                <h4>Examples</h4>
+                <div class="code-block">
+<span class="comment">-- Drop the Marks table</span>
+<span class="keyword">DROP TABLE</span> Marks;
+
+<span class="comment">-- Drop the entire University database</span>
+<span class="keyword">DROP DATABASE</span> University;
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <h4>Warning: Irreversible Action!</h4>
+                <ul>
+                    <li>DROP permanently deletes the object and all its data</li>
+                    <li>There is no "undo" for DROP commands</li>
+                    <li>You cannot drop a table that is referenced by foreign keys in other tables</li>
+                    <li>Always ensure you have backups before dropping objects</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 10: RENAME TABLE -->
+        <section id="rename-table" class="content-section">
+            <h2>10. RENAME TABLE</h2>
+
+            <p>The RENAME statement changes the name of an existing table.</p>
+
+            <h3>Syntax</h3>
+            <div class="code-block">
+<span class="keyword">RENAME TABLE</span> old_name <span class="keyword">TO</span> new_name;
+            </div>
+
+            <h3>Example</h3>
+            <div class="code-block">
+<span class="comment">-- Rename Student table to Students</span>
+<span class="keyword">RENAME TABLE</span> Student <span class="keyword">TO</span> Students;
+
+<span class="comment">-- Rename Professor table to Faculty</span>
+<span class="keyword">RENAME TABLE</span> Professor <span class="keyword">TO</span> Faculty;
+            </div>
+
+            <div class="tip-box">
+                <h4>Note</h4>
+                <p>When renaming tables, remember to update any queries, views, or application code that references the old table name.</p>
+            </div>
+        </section>
+
+        <!-- Exercises -->
+        <section id="exercises" class="content-section">
+            <h2>Practice Exercises</h2>
+
+            <div class="review-questions">
+                <h3>Try These SQL Statements</h3>
+                <ol>
+                    <li>Create a database called "Library"</li>
+                    <li>Create a table "Book" with columns: BookID (PK), Title, Author, PublishYear, ISBN</li>
+                    <li>Create a table "Member" with columns: MemberID (PK), Name, Email, JoinDate</li>
+                    <li>Create a table "Borrowing" that tracks which member borrowed which book (composite PK, with FKs)</li>
+                    <li>Add a "Phone" column to the Member table</li>
+                    <li>Rename the "Book" table to "Books"</li>
+                </ol>
+            </div>
+
+            <a href="../demos/ddl_commands_demo.html" class="demo-link">Practice DDL Commands in the Interactive Demo</a>
+        </section>
+
+        <!-- Review Questions -->
+        <section id="review" class="content-section">
+            <h2>Review Questions</h2>
+
+            <div class="review-questions">
+                <h3>Test Your Understanding</h3>
+                <ol>
+                    <li>What does DDL stand for and what commands does it include?</li>
+                    <li>What is the difference between DDL, DML, and DCL?</li>
+                    <li>Explain the purpose of a primary key. What constraints does it enforce?</li>
+                    <li>When would you use a composite primary key? Give an example.</li>
+                    <li>What is a foreign key and how does it enforce referential integrity?</li>
+                    <li>Why does the order of table creation matter when using foreign keys?</li>
+                    <li>What is the difference between DROP TABLE and ALTER TABLE DROP COLUMN?</li>
+                    <li>Write the SQL to create a table "Employee" with: EmpID (PK), Name, DeptID (FK to Department), Salary</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>Summary and Key Takeaways</h2>
+
+            <h3>What We've Learned</h3>
+            <ol>
+                <li><strong>SQL Components:</strong> SQL consists of DDL (structure), DML (data), and DCL (permissions).</li>
+
+                <li><strong>CREATE DATABASE/TABLE:</strong> Used to define new databases and tables with their columns and data types.</li>
+
+                <li><strong>Data Types:</strong> Common types include INTEGER, VARCHAR, DATE, and DECIMAL for storing different kinds of data.</li>
+
+                <li><strong>Primary Keys:</strong> Uniquely identify rows; can be single column or composite (multiple columns).</li>
+
+                <li><strong>Foreign Keys:</strong> Create relationships between tables and enforce referential integrity.</li>
+
+                <li><strong>ALTER TABLE:</strong> Modify existing tables by adding or dropping columns.</li>
+
+                <li><strong>DROP/RENAME:</strong> Remove or rename database objects (use with caution!).</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>Next Lecture:</strong> SQL Data Manipulation Language (DML) - We'll learn how to INSERT, UPDATE, DELETE, and SELECT data from tables.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="credits">
+            <h2>Credits</h2>
+            <p>Database Programming Course - COMP 2413</p>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index.html">&larr; Back to Course Home</a>
+        </p>
+    </footer>
+</body>
+</html>

@@ -1,0 +1,458 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture 1: Introduction to Database</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="lecture1_ar.html" class="lang-button" title="Switch to Arabic">العربية</a>
+    </div>
+
+    <header>
+        <h1>Introduction to Database</h1>
+        <p class="subtitle">Lecture 1: Foundations of Data Management</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>Contents</h2>
+        <ul>
+            <li><a href="#objectives">Learning Objectives</a></li>
+            <li><a href="#data-vs-info">1. Data vs Information</a></li>
+            <li><a href="#introducing-db">2. Introducing the Database</a></li>
+            <li><a href="#dbms">3. Database Management Systems (DBMS)</a></li>
+            <li><a href="#design-importance">4. Importance of Database Design</a></li>
+            <li><a href="#review">Review Questions</a></li>
+            <li><a href="#summary">Summary</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <p>By the end of this lecture, you will be able to:</p>
+            <ul>
+                <li>Distinguish between data and information</li>
+                <li>Define what a database is and its components</li>
+                <li>Understand the concepts of Entity, Record, and Attribute</li>
+                <li>Identify the advantages and costs of the database approach</li>
+                <li>Explain what a DBMS is and its core functions</li>
+                <li>Recognize the importance of good database design</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: Data vs Information -->
+        <section id="data-vs-info" class="content-section">
+            <h2>1. Data vs Information</h2>
+
+            <h3>What is Data?</h3>
+            <div class="definition">
+                <h4>Definition: Data</h4>
+                <p><strong>Data</strong> consists of raw facts - unprocessed facts that have not yet been organized or analyzed. Data by itself has little meaning without context.</p>
+            </div>
+
+            <h3>Types of Data</h3>
+            <div class="db-types-grid">
+                <div class="db-type-card">
+                    <div class="db-type-icon">🔤</div>
+                    <h4>Alphanumeric</h4>
+                    <p>Text and numbers combined</p>
+                    <span class="db-type-desc">Names, IDs, Addresses</span>
+                </div>
+                <div class="db-type-card">
+                    <div class="db-type-icon">🖼️</div>
+                    <h4>Image</h4>
+                    <p>Visual data formats</p>
+                    <span class="db-type-desc">Photos, Graphics</span>
+                </div>
+                <div class="db-type-card">
+                    <div class="db-type-icon">🔊</div>
+                    <h4>Audio</h4>
+                    <p>Sound recordings</p>
+                    <span class="db-type-desc">Music, Voice</span>
+                </div>
+                <div class="db-type-card">
+                    <div class="db-type-icon">🎬</div>
+                    <h4>Video</h4>
+                    <p>Moving images</p>
+                    <span class="db-type-desc">Movies, Clips</span>
+                </div>
+            </div>
+
+            <h3>What is Information?</h3>
+            <div class="definition">
+                <h4>Definition: Information</h4>
+                <p><strong>Information</strong> is data that has been processed, organized, or presented in a meaningful context. Information is useful for decision-making.</p>
+            </div>
+
+            <h3>Data Transformation Example</h3>
+            <div class="example">
+                <h4>Turning Data into Information</h4>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Raw Data</th>
+                            <th>Processed Information</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>5433333353</code></td>
+                            <td><code>(543) 333-3353</code> - A formatted phone number</td>
+                        </tr>
+                        <tr>
+                            <td><code>19900515</code></td>
+                            <td><code>May 15, 1990</code> - A birthdate</td>
+                        </tr>
+                        <tr>
+                            <td><code>ahmed85riyadh</code></td>
+                            <td>Username: Ahmed, born 1985, from Riyadh</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="key-message">
+                <h4>Key Insight</h4>
+                <p><strong>Data + Context + Processing = Information</strong></p>
+                <p>The same data can become different information depending on how it's processed and what context is applied.</p>
+            </div>
+
+            <a href="../demos/data_vs_info_demo.html" class="demo-link">Try the Data vs Information Interactive Demo</a>
+        </section>
+
+        <!-- Section 2: Introducing the Database -->
+        <section id="introducing-db" class="content-section">
+            <h2>2. Introducing the Database</h2>
+
+            <div class="definition">
+                <h4>Definition: Database</h4>
+                <p>A <strong>database</strong> is a collection of related data organized in a way that allows efficient storage, retrieval, and management. It represents some aspect of the real world (miniworld).</p>
+            </div>
+
+            <h3>Key Database Concepts</h3>
+            <div class="concept-cards">
+                <div class="concept-card">
+                    <div class="icon">👤</div>
+                    <h4>Entity</h4>
+                    <p class="arabic">(الكيان)</p>
+                    <p>A distinguishable object about which we store data. Examples: Person, Book, Student, Product</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">📝</div>
+                    <h4>Record</h4>
+                    <p class="arabic">(السجل)</p>
+                    <p>A collection of related data items about a single entity instance. Also called a row or tuple.</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">🏷️</div>
+                    <h4>Attribute</h4>
+                    <p class="arabic">(السمة)</p>
+                    <p>A characteristic or property of an entity. Examples: Name, Age, Email, Price</p>
+                </div>
+            </div>
+
+            <h3>Table Representation</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="highlight-attribute">StudentID</th>
+                            <th class="highlight-attribute">Name</th>
+                            <th class="highlight-attribute">Email</th>
+                            <th class="highlight-attribute">Major</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr class="highlight-record">
+                            <td>1001</td>
+                            <td>Ahmed Ali</td>
+                            <td>ahmed@email.com</td>
+                            <td>Computer Science</td>
+                        </tr>
+                        <tr>
+                            <td>1002</td>
+                            <td>Sara Mohammed</td>
+                            <td>sara@email.com</td>
+                            <td>Information Systems</td>
+                        </tr>
+                        <tr>
+                            <td>1003</td>
+                            <td>Omar Hassan</td>
+                            <td>omar@email.com</td>
+                            <td>Computer Science</td>
+                        </tr>
+                    </tbody>
+                </table>
+                <p class="diagram-note">Table = Entity | Columns = Attributes | Rows = Records</p>
+            </div>
+
+            <h3>Advantages of the Database Approach</h3>
+            <div class="advantages-grid">
+                <div class="advantage-card">
+                    <h4>1. Reduced Data Redundancy</h4>
+                    <p>Eliminates duplicate data by storing information in one place</p>
+                </div>
+                <div class="advantage-card">
+                    <h4>2. Improved Data Integrity</h4>
+                    <p>Ensures data accuracy and consistency through constraints</p>
+                </div>
+                <div class="advantage-card">
+                    <h4>3. Data Sharing</h4>
+                    <p>Multiple users can access the same data simultaneously</p>
+                </div>
+                <div class="advantage-card">
+                    <h4>4. Data Security</h4>
+                    <p>Access controls protect sensitive information</p>
+                </div>
+                <div class="advantage-card">
+                    <h4>5. Data Independence</h4>
+                    <p>Applications are insulated from physical data changes</p>
+                </div>
+                <div class="advantage-card">
+                    <h4>6. Efficient Data Access</h4>
+                    <p>Optimized queries and indexing for fast retrieval</p>
+                </div>
+                <div class="advantage-card">
+                    <h4>7. Backup and Recovery</h4>
+                    <p>Built-in mechanisms to protect against data loss</p>
+                </div>
+                <div class="advantage-card">
+                    <h4>8. Concurrent Access</h4>
+                    <p>Handles multiple users without conflicts</p>
+                </div>
+                <div class="advantage-card">
+                    <h4>9. Improved Decision Making</h4>
+                    <p>Provides organized data for analysis and reporting</p>
+                </div>
+                <div class="advantage-card">
+                    <h4>10. Standards Enforcement</h4>
+                    <p>Ensures consistent data formats and naming conventions</p>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <h4>Costs and Risks</h4>
+                <ul>
+                    <li><strong>Initial Cost:</strong> Software, hardware, and training expenses</li>
+                    <li><strong>Complexity:</strong> Requires skilled administrators</li>
+                    <li><strong>Performance Overhead:</strong> May be slower for simple applications</li>
+                    <li><strong>Single Point of Failure:</strong> Database crash affects all applications</li>
+                </ul>
+            </div>
+
+            <h3>Data Dictionary</h3>
+            <div class="definition">
+                <p>A <strong>Data Dictionary</strong> (or metadata repository) contains information about the structure of the database - descriptions of tables, columns, data types, constraints, and relationships.</p>
+            </div>
+
+            <h3>Database Administrator (DBA)</h3>
+            <div class="definition">
+                <p>The <strong>Database Administrator</strong> is responsible for managing the database system, including:</p>
+                <ul>
+                    <li>Database design and implementation</li>
+                    <li>Security and access control</li>
+                    <li>Backup and recovery procedures</li>
+                    <li>Performance monitoring and tuning</li>
+                    <li>User support and training</li>
+                </ul>
+            </div>
+
+            <h3>Data Entry Forms</h3>
+            <p>Forms provide a user-friendly interface for entering data into the database. They can include:</p>
+            <ul>
+                <li>Input validation to ensure data quality</li>
+                <li>Drop-down lists for consistent values</li>
+                <li>Automatic calculations</li>
+                <li>Help text and instructions</li>
+            </ul>
+
+            <a href="../demos/database_concepts_demo.html" class="demo-link">Explore Database Concepts Interactive Demo</a>
+        </section>
+
+        <!-- Section 3: DBMS -->
+        <section id="dbms" class="content-section">
+            <h2>3. Database Management Systems (DBMS)</h2>
+
+            <h3>Historical Context</h3>
+            <p>Before databases, data was stored in flat files with many limitations:</p>
+            <ul>
+                <li>Data redundancy and inconsistency</li>
+                <li>Difficulty in accessing data</li>
+                <li>Data isolation</li>
+                <li>Integrity problems</li>
+                <li>No concurrent access</li>
+            </ul>
+
+            <div class="definition">
+                <h4>Definition: DBMS</h4>
+                <p>A <strong>Database Management System (DBMS)</strong> is software that enables users to create, maintain, and control access to databases. It serves as an interface between users/applications and the stored data.</p>
+            </div>
+
+            <h3>Core DBMS Functions</h3>
+            <div class="properties-grid">
+                <div class="property-card">
+                    <h4>Create</h4>
+                    <p>Define database structure, tables, relationships, and constraints</p>
+                </div>
+                <div class="property-card">
+                    <h4>Store</h4>
+                    <p>Insert and maintain data in an organized manner</p>
+                </div>
+                <div class="property-card">
+                    <h4>Organize</h4>
+                    <p>Structure data logically with tables, indexes, and views</p>
+                </div>
+                <div class="property-card">
+                    <h4>Retrieve</h4>
+                    <p>Query and extract data efficiently using SQL</p>
+                </div>
+            </div>
+
+            <h3>Popular DBMS Examples</h3>
+            <div class="dbms-grid">
+                <div class="dbms-card">
+                    <div class="dbms-icon">🐬</div>
+                    <h4>MySQL</h4>
+                    <p>Open-source, widely used for web applications</p>
+                    <span class="dbms-type">Relational</span>
+                </div>
+                <div class="dbms-card">
+                    <div class="dbms-icon">🔶</div>
+                    <h4>Oracle</h4>
+                    <p>Enterprise-grade, powerful features</p>
+                    <span class="dbms-type">Relational</span>
+                </div>
+                <div class="dbms-card">
+                    <div class="dbms-icon">🔷</div>
+                    <h4>SQL Server</h4>
+                    <p>Microsoft's enterprise database</p>
+                    <span class="dbms-type">Relational</span>
+                </div>
+                <div class="dbms-card">
+                    <div class="dbms-icon">📊</div>
+                    <h4>MS Access</h4>
+                    <p>Desktop database for small applications</p>
+                    <span class="dbms-type">Relational</span>
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <h4>Important Note</h4>
+                <p><strong>Microsoft Excel is NOT a DBMS!</strong> While Excel can store data in rows and columns, it lacks the essential features of a true DBMS such as data integrity enforcement, concurrent access control, and SQL querying capabilities.</p>
+            </div>
+
+            <h3>Introduction to SQL</h3>
+            <div class="definition">
+                <h4>Definition: SQL</h4>
+                <p><strong>SQL (Structured Query Language)</strong> is the standard language for interacting with relational databases. It allows you to create, query, update, and manage data.</p>
+            </div>
+
+            <div class="code-block">
+<span class="comment">-- Example SQL Query</span>
+<span class="keyword">SELECT</span> Name, Email
+<span class="keyword">FROM</span> Students
+<span class="keyword">WHERE</span> Major = <span class="string">'Computer Science'</span>;
+            </div>
+
+            <p>SQL is divided into several categories:</p>
+            <ul>
+                <li><strong>DDL (Data Definition Language):</strong> CREATE, ALTER, DROP</li>
+                <li><strong>DML (Data Manipulation Language):</strong> SELECT, INSERT, UPDATE, DELETE</li>
+                <li><strong>DCL (Data Control Language):</strong> GRANT, REVOKE</li>
+            </ul>
+        </section>
+
+        <!-- Section 4: Importance of Database Design -->
+        <section id="design-importance" class="content-section">
+            <h2>4. Importance of Database Design</h2>
+
+            <p>Database design is the process of producing a detailed data model of a database. The quality of design directly impacts the success of the system.</p>
+
+            <div class="properties-grid">
+                <div class="property-card">
+                    <h4>Good Design</h4>
+                    <ul>
+                        <li>Produces correct results</li>
+                        <li>Fast query performance</li>
+                        <li>Easy to maintain and modify</li>
+                        <li>Minimal data redundancy</li>
+                        <li>Enforces data integrity</li>
+                    </ul>
+                </div>
+                <div class="property-card">
+                    <h4>Poor Design</h4>
+                    <ul>
+                        <li>Incorrect or inconsistent results</li>
+                        <li>Slow performance</li>
+                        <li>Difficult to modify</li>
+                        <li>Excessive redundancy</li>
+                        <li>Data anomalies</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <h4>Key Principle</h4>
+                <p>A well-designed database is the foundation of any successful information system. Time invested in proper design pays off many times over during development and maintenance.</p>
+            </div>
+        </section>
+
+        <!-- Review Questions -->
+        <section id="review" class="content-section">
+            <h2>Review Questions</h2>
+
+            <div class="review-questions">
+                <h3>Test Your Understanding</h3>
+                <ol>
+                    <li>What is the difference between data and information? Give an example.</li>
+                    <li>Define the following terms: Entity, Record, Attribute</li>
+                    <li>List five advantages of using a database approach.</li>
+                    <li>What is a DBMS and what are its core functions?</li>
+                    <li>Why is Excel not considered a DBMS?</li>
+                    <li>Explain why good database design is important.</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>Summary and Key Takeaways</h2>
+
+            <h3>What We've Learned</h3>
+            <ol>
+                <li><strong>Data vs Information:</strong> Data is raw facts; information is processed data that provides meaning and context.</li>
+
+                <li><strong>Database Fundamentals:</strong> A database is an organized collection of related data, consisting of entities (tables), records (rows), and attributes (columns).</li>
+
+                <li><strong>Database Advantages:</strong> The database approach offers reduced redundancy, improved integrity, better security, and efficient data sharing.</li>
+
+                <li><strong>DBMS Role:</strong> Database Management Systems provide tools to create, store, organize, and retrieve data efficiently.</li>
+
+                <li><strong>SQL Introduction:</strong> SQL is the standard language for working with relational databases.</li>
+
+                <li><strong>Design Matters:</strong> Good database design is crucial for system success, affecting performance, maintainability, and data quality.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>Next Lecture:</strong> SQL Data Definition Language (DDL) - We'll learn how to create databases and tables using SQL commands.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="credits">
+            <h2>Credits</h2>
+            <p>Database Programming Course - COMP 2413</p>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index.html">&larr; Back to Course Home</a>
+        </p>
+    </footer>
+</body>
+</html>

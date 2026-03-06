@@ -1,0 +1,576 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Database Concepts Interactive Demo</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .demo-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .concept-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .concept-cards-demo {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .concept-card-demo {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .concept-card-demo:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        .concept-card-demo.active {
+            border-color: var(--primary-color);
+            background: var(--highlight-bg);
+        }
+
+        .concept-icon {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+        }
+
+        .concept-title {
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .concept-arabic {
+            font-size: 1.1rem;
+            color: var(--accent-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .concept-desc {
+            color: #666;
+            font-size: 0.95rem;
+        }
+
+        /* Interactive Table */
+        .table-container {
+            overflow-x: auto;
+            margin: 2rem 0;
+        }
+
+        .interactive-table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow: hidden;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .interactive-table th {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            text-align: left;
+            cursor: pointer;
+            transition: background 0.3s ease;
+        }
+
+        .interactive-table th:hover {
+            background: var(--accent-color);
+        }
+
+        .interactive-table th.highlighted {
+            background: #ff9800;
+        }
+
+        .interactive-table td {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border-color);
+            transition: all 0.3s ease;
+        }
+
+        .interactive-table tr {
+            cursor: pointer;
+        }
+
+        .interactive-table tr:hover td {
+            background: #f0f0f0;
+        }
+
+        .interactive-table tr.highlighted td {
+            background: #fff3e0;
+        }
+
+        .interactive-table td.highlighted {
+            background: #c8e6c9 !important;
+            font-weight: 600;
+        }
+
+        /* Info Panel */
+        .info-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin-top: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            min-height: 100px;
+        }
+
+        .info-panel h3 {
+            color: var(--primary-color);
+            margin-top: 0;
+            margin-bottom: 1rem;
+        }
+
+        .info-panel .label {
+            display: inline-block;
+            background: var(--secondary-color);
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            margin-bottom: 0.75rem;
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+        }
+
+        .legend-color.entity { background: var(--primary-color); }
+        .legend-color.record { background: #fff3e0; border: 2px solid #ff9800; }
+        .legend-color.attribute { background: #c8e6c9; border: 2px solid #4caf50; }
+
+        /* Example Selector */
+        .example-selector {
+            display: flex;
+            gap: 1rem;
+            justify-content: center;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .example-btn {
+            padding: 0.75rem 1.5rem;
+            border: 2px solid var(--secondary-color);
+            background: white;
+            color: var(--primary-color);
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .example-btn:hover, .example-btn.active {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        /* Statistics */
+        .stats-row {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            min-width: 120px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Instructions */
+        .instructions {
+            background: var(--highlight-bg);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .instructions h4 {
+            margin: 0 0 0.5rem 0;
+            color: var(--primary-color);
+        }
+
+        @media (max-width: 768px) {
+            .concept-cards-demo {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-row {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="language-switcher">
+        <a href="../lectures/lecture1.html" class="lang-button">Back to Lecture</a>
+    </div>
+
+    <div class="demo-container">
+        <header style="text-align: center; margin-bottom: 2rem;">
+            <h1>Database Concepts Explorer</h1>
+            <p class="subtitle">Interactive Demo - Understand Entity, Record, and Attribute</p>
+        </header>
+
+        <!-- Concept Cards -->
+        <section class="concept-section">
+            <h2 style="text-align: center; margin-top: 0;">Core Database Concepts</h2>
+            <p style="text-align: center; color: #666;">Click each concept to learn more and see it highlighted in the table below</p>
+
+            <div class="concept-cards-demo">
+                <div class="concept-card-demo" id="entity-card" onclick="highlightConcept('entity')">
+                    <div class="concept-icon">📋</div>
+                    <div class="concept-title">Entity (Table)</div>
+                    <div class="concept-arabic">الكيان</div>
+                    <div class="concept-desc">A real-world object or concept we store data about</div>
+                </div>
+
+                <div class="concept-card-demo" id="record-card" onclick="highlightConcept('record')">
+                    <div class="concept-icon">📝</div>
+                    <div class="concept-title">Record (Row)</div>
+                    <div class="concept-arabic">السجل</div>
+                    <div class="concept-desc">A single instance of an entity with its data</div>
+                </div>
+
+                <div class="concept-card-demo" id="attribute-card" onclick="highlightConcept('attribute')">
+                    <div class="concept-icon">🏷️</div>
+                    <div class="concept-title">Attribute (Column)</div>
+                    <div class="concept-arabic">السمة</div>
+                    <div class="concept-desc">A characteristic or property of an entity</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Interactive Table -->
+        <section class="concept-section">
+            <h2 style="text-align: center; margin-top: 0;">Interactive Database Table</h2>
+
+            <div class="instructions">
+                <h4>How to Use:</h4>
+                <ul style="margin: 0; padding-left: 1.5rem;">
+                    <li>Click on a <strong>concept card</strong> above to see it highlighted</li>
+                    <li>Click on a <strong>table header</strong> to highlight that attribute (column)</li>
+                    <li>Click on a <strong>table row</strong> to highlight that record</li>
+                    <li>Switch between different <strong>entity examples</strong> below</li>
+                </ul>
+            </div>
+
+            <div class="example-selector">
+                <button class="example-btn active" onclick="changeEntity('students')">Students</button>
+                <button class="example-btn" onclick="changeEntity('books')">Books</button>
+                <button class="example-btn" onclick="changeEntity('products')">Products</button>
+                <button class="example-btn" onclick="changeEntity('employees')">Employees</button>
+            </div>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color entity"></div>
+                    <span>Entity (whole table)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color record"></div>
+                    <span>Record (row)</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color attribute"></div>
+                    <span>Attribute (column)</span>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table class="interactive-table" id="demo-table">
+                    <thead>
+                        <tr id="table-header"></tr>
+                    </thead>
+                    <tbody id="table-body"></tbody>
+                </table>
+            </div>
+
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-value" id="record-count">0</div>
+                    <div class="stat-label">Records</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="attribute-count">0</div>
+                    <div class="stat-label">Attributes</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="cell-count">0</div>
+                    <div class="stat-label">Data Cells</div>
+                </div>
+            </div>
+
+            <div class="info-panel" id="info-panel">
+                <h3>Select an Element</h3>
+                <p>Click on the concept cards above, or click on any part of the table to see detailed information about that database component.</p>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <div class="key-message">
+            <h3>Remember</h3>
+            <p style="text-align: center; font-size: 1.1rem;">
+                <strong>Entity</strong> = Table (what we store data about)<br>
+                <strong>Record</strong> = Row (one instance of an entity)<br>
+                <strong>Attribute</strong> = Column (a property of the entity)
+            </p>
+        </div>
+
+        <footer style="text-align: center; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+            <p><a href="../lectures/lecture1.html">← Back to Lecture 1</a> | <a href="../index.html">Course Home</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const entities = {
+            students: {
+                name: 'Students',
+                attributes: ['StudentID', 'Name', 'Email', 'Major', 'GPA'],
+                records: [
+                    ['1001', 'Ahmed Ali', 'ahmed@email.com', 'Computer Science', '3.75'],
+                    ['1002', 'Sara Mohammed', 'sara@email.com', 'Information Systems', '3.90'],
+                    ['1003', 'Omar Hassan', 'omar@email.com', 'Computer Science', '3.45'],
+                    ['1004', 'Fatima Abdullah', 'fatima@email.com', 'Data Science', '3.82']
+                ]
+            },
+            books: {
+                name: 'Books',
+                attributes: ['ISBN', 'Title', 'Author', 'Year', 'Price'],
+                records: [
+                    ['978-0134685991', 'Database Systems', 'Elmasri', '2016', '$125.00'],
+                    ['978-0132350884', 'Clean Code', 'Martin', '2008', '$45.99'],
+                    ['978-0596009205', 'Head First Design', 'Freeman', '2004', '$59.99'],
+                    ['978-0134494166', 'SQL Cookbook', 'Molinaro', '2020', '$55.00']
+                ]
+            },
+            products: {
+                name: 'Products',
+                attributes: ['ProductID', 'Name', 'Category', 'Stock', 'Price'],
+                records: [
+                    ['P001', 'Laptop Pro', 'Electronics', '45', '$1,299.00'],
+                    ['P002', 'Wireless Mouse', 'Electronics', '200', '$29.99'],
+                    ['P003', 'Office Chair', 'Furniture', '30', '$199.00'],
+                    ['P004', 'USB Hub', 'Electronics', '150', '$24.99']
+                ]
+            },
+            employees: {
+                name: 'Employees',
+                attributes: ['EmployeeID', 'Name', 'Department', 'Position', 'Salary'],
+                records: [
+                    ['E001', 'Mohammed Al-Rashid', 'IT', 'Developer', '$75,000'],
+                    ['E002', 'Layla Hassan', 'HR', 'Manager', '$85,000'],
+                    ['E003', 'Khalid Omar', 'IT', 'Analyst', '$65,000'],
+                    ['E004', 'Nora Ahmed', 'Finance', 'Accountant', '$60,000']
+                ]
+            }
+        };
+
+        let currentEntity = 'students';
+        let selectedAttribute = null;
+        let selectedRecord = null;
+
+        function renderTable() {
+            const entity = entities[currentEntity];
+            const headerRow = document.getElementById('table-header');
+            const tbody = document.getElementById('table-body');
+
+            // Clear existing
+            headerRow.innerHTML = '';
+            tbody.innerHTML = '';
+
+            // Render headers
+            entity.attributes.forEach((attr, index) => {
+                const th = document.createElement('th');
+                th.textContent = attr;
+                th.onclick = () => highlightAttribute(index);
+                if (selectedAttribute === index) {
+                    th.classList.add('highlighted');
+                }
+                headerRow.appendChild(th);
+            });
+
+            // Render rows
+            entity.records.forEach((record, rowIndex) => {
+                const tr = document.createElement('tr');
+                tr.onclick = () => highlightRecord(rowIndex);
+                if (selectedRecord === rowIndex) {
+                    tr.classList.add('highlighted');
+                }
+
+                record.forEach((cell, colIndex) => {
+                    const td = document.createElement('td');
+                    td.textContent = cell;
+                    if (selectedAttribute === colIndex) {
+                        td.classList.add('highlighted');
+                    }
+                    tr.appendChild(td);
+                });
+
+                tbody.appendChild(tr);
+            });
+
+            // Update stats
+            document.getElementById('record-count').textContent = entity.records.length;
+            document.getElementById('attribute-count').textContent = entity.attributes.length;
+            document.getElementById('cell-count').textContent = entity.records.length * entity.attributes.length;
+        }
+
+        function changeEntity(entityName) {
+            currentEntity = entityName;
+            selectedAttribute = null;
+            selectedRecord = null;
+
+            // Update buttons
+            document.querySelectorAll('.example-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Clear concept highlights
+            document.querySelectorAll('.concept-card-demo').forEach(card => card.classList.remove('active'));
+
+            renderTable();
+            updateInfoPanel('entity', entities[entityName].name);
+        }
+
+        function highlightConcept(concept) {
+            // Update cards
+            document.querySelectorAll('.concept-card-demo').forEach(card => card.classList.remove('active'));
+            document.getElementById(concept + '-card').classList.add('active');
+
+            // Clear other selections
+            selectedAttribute = null;
+            selectedRecord = null;
+
+            if (concept === 'entity') {
+                updateInfoPanel('entity', entities[currentEntity].name);
+            } else if (concept === 'record') {
+                selectedRecord = 0;
+                updateInfoPanel('record', entities[currentEntity].records[0]);
+            } else if (concept === 'attribute') {
+                selectedAttribute = 0;
+                updateInfoPanel('attribute', entities[currentEntity].attributes[0]);
+            }
+
+            renderTable();
+        }
+
+        function highlightAttribute(index) {
+            selectedAttribute = index;
+            selectedRecord = null;
+
+            // Update cards
+            document.querySelectorAll('.concept-card-demo').forEach(card => card.classList.remove('active'));
+            document.getElementById('attribute-card').classList.add('active');
+
+            renderTable();
+            updateInfoPanel('attribute', entities[currentEntity].attributes[index]);
+        }
+
+        function highlightRecord(index) {
+            selectedRecord = index;
+            selectedAttribute = null;
+
+            // Update cards
+            document.querySelectorAll('.concept-card-demo').forEach(card => card.classList.remove('active'));
+            document.getElementById('record-card').classList.add('active');
+
+            renderTable();
+            updateInfoPanel('record', entities[currentEntity].records[index]);
+        }
+
+        function updateInfoPanel(type, data) {
+            const panel = document.getElementById('info-panel');
+            const entity = entities[currentEntity];
+
+            if (type === 'entity') {
+                panel.innerHTML = `
+                    <span class="label">Entity (Table)</span>
+                    <h3>${data}</h3>
+                    <p>This table represents the <strong>${data}</strong> entity. It contains ${entity.records.length} records, each with ${entity.attributes.length} attributes.</p>
+                    <p><strong>Attributes:</strong> ${entity.attributes.join(', ')}</p>
+                `;
+            } else if (type === 'record') {
+                const recordData = entity.attributes.map((attr, i) => `<li><strong>${attr}:</strong> ${data[i]}</li>`).join('');
+                panel.innerHTML = `
+                    <span class="label">Record (Row)</span>
+                    <h3>Single ${entity.name.slice(0, -1)} Record</h3>
+                    <p>This record contains all the data for one specific ${entity.name.toLowerCase().slice(0, -1)}:</p>
+                    <ul style="margin: 0.5rem 0; padding-left: 1.5rem;">${recordData}</ul>
+                `;
+            } else if (type === 'attribute') {
+                const values = entity.records.map(r => r[entity.attributes.indexOf(data)]);
+                panel.innerHTML = `
+                    <span class="label">Attribute (Column)</span>
+                    <h3>${data}</h3>
+                    <p>This attribute stores the <strong>${data.toLowerCase()}</strong> for each ${entity.name.toLowerCase().slice(0, -1)} in the database.</p>
+                    <p><strong>Values in this column:</strong> ${values.join(', ')}</p>
+                `;
+            }
+        }
+
+        // Initialize
+        renderTable();
+        updateInfoPanel('entity', entities[currentEntity].name);
+    </script>
+</body>
+</html>

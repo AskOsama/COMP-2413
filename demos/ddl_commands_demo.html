@@ -1,0 +1,765 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DDL Commands Interactive Demo</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .demo-container {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .command-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        /* Command Buttons */
+        .command-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 1rem;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+
+        .cmd-btn {
+            padding: 1rem 2rem;
+            border: 3px solid var(--secondary-color);
+            background: white;
+            color: var(--primary-color);
+            border-radius: 12px;
+            cursor: pointer;
+            font-weight: 700;
+            font-size: 1.1rem;
+            transition: all 0.3s ease;
+            min-width: 140px;
+        }
+
+        .cmd-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+        }
+
+        .cmd-btn.active {
+            background: var(--secondary-color);
+            color: white;
+            transform: translateY(-3px);
+        }
+
+        .cmd-btn.create { border-color: #4caf50; }
+        .cmd-btn.create.active { background: #4caf50; }
+        .cmd-btn.alter { border-color: #2196f3; }
+        .cmd-btn.alter.active { background: #2196f3; }
+        .cmd-btn.drop { border-color: #f44336; }
+        .cmd-btn.drop.active { background: #f44336; }
+        .cmd-btn.rename { border-color: #ff9800; }
+        .cmd-btn.rename.active { background: #ff9800; }
+
+        /* Sub-command selector */
+        .subcommand-selector {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+            margin: 1rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .subcmd-btn {
+            padding: 0.5rem 1rem;
+            border: 2px solid #ddd;
+            background: white;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            transition: all 0.2s ease;
+        }
+
+        .subcmd-btn:hover {
+            border-color: var(--secondary-color);
+        }
+
+        .subcmd-btn.active {
+            background: var(--highlight-bg);
+            border-color: var(--secondary-color);
+            font-weight: 600;
+        }
+
+        /* Code Display */
+        .code-display {
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            overflow-x: auto;
+        }
+
+        .code-display pre {
+            margin: 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 1rem;
+            line-height: 1.6;
+            color: #d4d4d4;
+            white-space: pre-wrap;
+        }
+
+        .code-display .keyword { color: #569cd6; font-weight: bold; }
+        .code-display .string { color: #ce9178; }
+        .code-display .number { color: #b5cea8; }
+        .code-display .comment { color: #6a9955; font-style: italic; }
+        .code-display .datatype { color: #4ec9b0; }
+        .code-display .constraint { color: #c586c0; }
+
+        /* Result Panel */
+        .result-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .result-panel h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .result-panel .icon {
+            font-size: 1.5rem;
+        }
+
+        .result-success {
+            border-left: 4px solid #4caf50;
+        }
+
+        .result-warning {
+            border-left: 4px solid #ff9800;
+        }
+
+        .result-error {
+            border-left: 4px solid #f44336;
+        }
+
+        /* Table Visualization */
+        .table-viz {
+            background: #f8f9fa;
+            border-radius: 8px;
+            padding: 1rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .table-viz table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 0.5rem 0;
+        }
+
+        .table-viz th {
+            background: var(--primary-color);
+            color: white;
+            padding: 0.75rem;
+            text-align: left;
+        }
+
+        .table-viz td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #ddd;
+            background: white;
+        }
+
+        .table-viz .pk-col {
+            background: #fff3e0;
+        }
+
+        .table-viz .fk-col {
+            background: #e3f2fd;
+        }
+
+        .table-viz .new-col {
+            background: #e8f5e9;
+            animation: highlight-new 1s ease;
+        }
+
+        @keyframes highlight-new {
+            0% { background: #a5d6a7; }
+            100% { background: #e8f5e9; }
+        }
+
+        /* Description Panel */
+        .description-panel {
+            background: var(--highlight-bg);
+            border-radius: 8px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .description-panel h4 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        /* Command Info Cards */
+        .info-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin: 1rem 0;
+        }
+
+        .info-card {
+            background: white;
+            border-radius: 8px;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+
+        .info-card .label {
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .info-card .value {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--primary-color);
+            margin-top: 0.25rem;
+        }
+
+        /* Try It Section */
+        .try-it-section {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+        }
+
+        .try-it-section h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+        }
+
+        .sql-input {
+            width: 100%;
+            min-height: 120px;
+            padding: 1rem;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 1rem;
+            resize: vertical;
+        }
+
+        .sql-input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .execute-btn {
+            margin-top: 1rem;
+            padding: 0.75rem 2rem;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .execute-btn:hover {
+            background: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .command-buttons {
+                flex-direction: column;
+            }
+
+            .cmd-btn {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="language-switcher">
+        <a href="../lectures/lecture2.html" class="lang-button">Back to Lecture</a>
+    </div>
+
+    <div class="demo-container">
+        <header style="text-align: center; margin-bottom: 2rem;">
+            <h1>DDL Commands Explorer</h1>
+            <p class="subtitle">Interactive Demo - Data Definition Language</p>
+        </header>
+
+        <!-- Command Selector -->
+        <section class="command-section">
+            <h2 style="text-align: center; margin-top: 0;">Select a DDL Command</h2>
+            <p style="text-align: center; color: #666;">Click a command to see its syntax, examples, and simulated output</p>
+
+            <div class="command-buttons">
+                <button class="cmd-btn create active" onclick="selectCommand('create')">CREATE</button>
+                <button class="cmd-btn alter" onclick="selectCommand('alter')">ALTER</button>
+                <button class="cmd-btn drop" onclick="selectCommand('drop')">DROP</button>
+                <button class="cmd-btn rename" onclick="selectCommand('rename')">RENAME</button>
+            </div>
+
+            <div class="subcommand-selector" id="subcommand-selector">
+                <!-- Populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Code Display -->
+        <section class="command-section">
+            <h2 style="margin-top: 0;">SQL Syntax</h2>
+
+            <div class="description-panel" id="description-panel">
+                <!-- Populated by JavaScript -->
+            </div>
+
+            <div class="code-display">
+                <pre id="code-display">-- Select a command above to see the SQL syntax</pre>
+            </div>
+
+            <div class="info-grid" id="info-grid">
+                <!-- Populated by JavaScript -->
+            </div>
+        </section>
+
+        <!-- Result Visualization -->
+        <section class="command-section">
+            <h2 style="margin-top: 0;">Simulated Result</h2>
+
+            <div class="result-panel result-success" id="result-panel">
+                <h3><span class="icon">✓</span> <span id="result-title">Command Result</span></h3>
+                <div id="result-content">
+                    <!-- Populated by JavaScript -->
+                </div>
+            </div>
+        </section>
+
+        <!-- Try It Yourself -->
+        <section class="try-it-section">
+            <h3>Try It Yourself</h3>
+            <p>Write your own DDL statement and see the simulated result:</p>
+
+            <textarea class="sql-input" id="sql-input" placeholder="-- Write your SQL here
+CREATE TABLE MyTable (
+    id INTEGER PRIMARY KEY,
+    name VARCHAR(50)
+);"></textarea>
+
+            <button class="execute-btn" onclick="executeCustomSQL()">Execute</button>
+
+            <div class="result-panel" id="custom-result" style="display: none; margin-top: 1rem;">
+                <h3><span class="icon">📋</span> Output</h3>
+                <div id="custom-result-content"></div>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <div class="key-message">
+            <h3>DDL Commands Summary</h3>
+            <p style="text-align: center;">
+                <strong>CREATE</strong> - Define new databases, tables, indexes<br>
+                <strong>ALTER</strong> - Modify existing table structure<br>
+                <strong>DROP</strong> - Remove database objects permanently<br>
+                <strong>RENAME</strong> - Change object names
+            </p>
+        </div>
+
+        <footer style="text-align: center; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+            <p><a href="../lectures/lecture2.html">← Back to Lecture 2</a> | <a href="../index.html">Course Home</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const commands = {
+            create: {
+                subcommands: ['DATABASE', 'TABLE', 'TABLE with PK', 'TABLE with FK'],
+                examples: {
+                    'DATABASE': {
+                        description: 'Creates a new database container for storing related tables.',
+                        code: `<span class="comment">-- Create a new database</span>
+<span class="keyword">CREATE DATABASE</span> University;
+
+<span class="comment">-- Select the database to use</span>
+<span class="keyword">USE</span> University;`,
+                        info: [
+                            { label: 'Command Type', value: 'DDL' },
+                            { label: 'Object Created', value: 'Database' },
+                            { label: 'Reversible', value: 'DROP DATABASE' }
+                        ],
+                        result: {
+                            type: 'success',
+                            title: 'Database Created Successfully',
+                            content: `<p>Database <strong>University</strong> has been created.</p>
+                            <p>The database is now ready to store tables.</p>
+                            <div class="info-card" style="margin-top: 1rem;">
+                                <div class="label">Current Database</div>
+                                <div class="value">University</div>
+                            </div>`
+                        }
+                    },
+                    'TABLE': {
+                        description: 'Creates a new table with specified columns and data types.',
+                        code: `<span class="comment">-- Create a simple table</span>
+<span class="keyword">CREATE TABLE</span> authors (
+    author_id   <span class="datatype">INTEGER</span>,
+    first_name  <span class="datatype">VARCHAR</span>(<span class="number">50</span>),
+    last_name   <span class="datatype">VARCHAR</span>(<span class="number">50</span>),
+    birth_date  <span class="datatype">DATE</span>
+);`,
+                        info: [
+                            { label: 'Columns', value: '4' },
+                            { label: 'Data Types', value: 'INT, VARCHAR, DATE' },
+                            { label: 'Constraints', value: 'None' }
+                        ],
+                        result: {
+                            type: 'success',
+                            title: 'Table Created Successfully',
+                            content: `<p>Table <strong>authors</strong> created with 4 columns.</p>
+                            <div class="table-viz">
+                                <table>
+                                    <tr><th>Column</th><th>Type</th><th>Constraints</th></tr>
+                                    <tr><td>author_id</td><td>INTEGER</td><td>-</td></tr>
+                                    <tr><td>first_name</td><td>VARCHAR(50)</td><td>-</td></tr>
+                                    <tr><td>last_name</td><td>VARCHAR(50)</td><td>-</td></tr>
+                                    <tr><td>birth_date</td><td>DATE</td><td>-</td></tr>
+                                </table>
+                            </div>`
+                        }
+                    },
+                    'TABLE with PK': {
+                        description: 'Creates a table with a PRIMARY KEY constraint that uniquely identifies each row.',
+                        code: `<span class="comment">-- Create table with primary key</span>
+<span class="keyword">CREATE TABLE</span> Student (
+    Sid     <span class="datatype">INTEGER</span> <span class="constraint">PRIMARY KEY</span>,
+    sname   <span class="datatype">VARCHAR</span>(<span class="number">100</span>),
+    age     <span class="datatype">INTEGER</span>,
+    sex     <span class="datatype">VARCHAR</span>(<span class="number">10</span>)
+);`,
+                        info: [
+                            { label: 'Primary Key', value: 'Sid' },
+                            { label: 'PK Properties', value: 'Unique, Not NULL' },
+                            { label: 'Columns', value: '4' }
+                        ],
+                        result: {
+                            type: 'success',
+                            title: 'Table with Primary Key Created',
+                            content: `<p>Table <strong>Student</strong> created with Sid as primary key.</p>
+                            <div class="table-viz">
+                                <table>
+                                    <tr><th>Column</th><th>Type</th><th>Constraints</th></tr>
+                                    <tr class="pk-col"><td>Sid</td><td>INTEGER</td><td>PRIMARY KEY</td></tr>
+                                    <tr><td>sname</td><td>VARCHAR(100)</td><td>-</td></tr>
+                                    <tr><td>age</td><td>INTEGER</td><td>-</td></tr>
+                                    <tr><td>sex</td><td>VARCHAR(10)</td><td>-</td></tr>
+                                </table>
+                            </div>
+                            <p style="margin-top: 1rem; color: #666;"><strong>Note:</strong> Primary key columns are highlighted in orange.</p>`
+                        }
+                    },
+                    'TABLE with FK': {
+                        description: 'Creates a table with a FOREIGN KEY that references another table, establishing a relationship.',
+                        code: `<span class="comment">-- Create table with foreign key</span>
+<span class="keyword">CREATE TABLE</span> Course (
+    Cid     <span class="datatype">INTEGER</span> <span class="constraint">PRIMARY KEY</span>,
+    cname   <span class="datatype">VARCHAR</span>(<span class="number">100</span>),
+    Pid     <span class="datatype">INTEGER</span>,
+    <span class="constraint">FOREIGN KEY</span> (Pid) <span class="keyword">REFERENCES</span> Professor(Pid)
+);`,
+                        info: [
+                            { label: 'Primary Key', value: 'Cid' },
+                            { label: 'Foreign Key', value: 'Pid → Professor' },
+                            { label: 'Relationship', value: 'Many-to-One' }
+                        ],
+                        result: {
+                            type: 'success',
+                            title: 'Table with Foreign Key Created',
+                            content: `<p>Table <strong>Course</strong> created with FK referencing Professor.</p>
+                            <div class="table-viz">
+                                <table>
+                                    <tr><th>Column</th><th>Type</th><th>Constraints</th></tr>
+                                    <tr class="pk-col"><td>Cid</td><td>INTEGER</td><td>PRIMARY KEY</td></tr>
+                                    <tr><td>cname</td><td>VARCHAR(100)</td><td>-</td></tr>
+                                    <tr class="fk-col"><td>Pid</td><td>INTEGER</td><td>FOREIGN KEY → Professor(Pid)</td></tr>
+                                </table>
+                            </div>
+                            <p style="margin-top: 1rem; color: #666;"><strong>Note:</strong> Foreign key columns are highlighted in blue.</p>`
+                        }
+                    }
+                }
+            },
+            alter: {
+                subcommands: ['ADD Column', 'DROP Column'],
+                examples: {
+                    'ADD Column': {
+                        description: 'Adds a new column to an existing table.',
+                        code: `<span class="comment">-- Add a new column to existing table</span>
+<span class="keyword">ALTER TABLE</span> Student
+<span class="keyword">ADD</span> email <span class="datatype">VARCHAR</span>(<span class="number">100</span>);`,
+                        info: [
+                            { label: 'Table', value: 'Student' },
+                            { label: 'New Column', value: 'email' },
+                            { label: 'Data Type', value: 'VARCHAR(100)' }
+                        ],
+                        result: {
+                            type: 'success',
+                            title: 'Column Added Successfully',
+                            content: `<p>Column <strong>email</strong> added to Student table.</p>
+                            <div class="table-viz">
+                                <table>
+                                    <tr><th>Column</th><th>Type</th><th>Constraints</th></tr>
+                                    <tr class="pk-col"><td>Sid</td><td>INTEGER</td><td>PRIMARY KEY</td></tr>
+                                    <tr><td>sname</td><td>VARCHAR(100)</td><td>-</td></tr>
+                                    <tr><td>age</td><td>INTEGER</td><td>-</td></tr>
+                                    <tr><td>sex</td><td>VARCHAR(10)</td><td>-</td></tr>
+                                    <tr class="new-col"><td>email</td><td>VARCHAR(100)</td><td>NEW</td></tr>
+                                </table>
+                            </div>`
+                        }
+                    },
+                    'DROP Column': {
+                        description: 'Removes an existing column from a table. This permanently deletes the column and its data.',
+                        code: `<span class="comment">-- Remove a column from table</span>
+<span class="keyword">ALTER TABLE</span> Student
+<span class="keyword">DROP COLUMN</span> email;`,
+                        info: [
+                            { label: 'Table', value: 'Student' },
+                            { label: 'Removed Column', value: 'email' },
+                            { label: 'Warning', value: 'Data Lost!' }
+                        ],
+                        result: {
+                            type: 'warning',
+                            title: 'Column Dropped',
+                            content: `<p>Column <strong>email</strong> removed from Student table.</p>
+                            <div class="table-viz">
+                                <table>
+                                    <tr><th>Column</th><th>Type</th><th>Constraints</th></tr>
+                                    <tr class="pk-col"><td>Sid</td><td>INTEGER</td><td>PRIMARY KEY</td></tr>
+                                    <tr><td>sname</td><td>VARCHAR(100)</td><td>-</td></tr>
+                                    <tr><td>age</td><td>INTEGER</td><td>-</td></tr>
+                                    <tr><td>sex</td><td>VARCHAR(10)</td><td>-</td></tr>
+                                </table>
+                            </div>
+                            <p style="color: #f57c00; margin-top: 1rem;"><strong>Warning:</strong> All data in the dropped column has been permanently deleted.</p>`
+                        }
+                    }
+                }
+            },
+            drop: {
+                subcommands: ['TABLE', 'DATABASE'],
+                examples: {
+                    'TABLE': {
+                        description: 'Permanently removes a table and all its data from the database.',
+                        code: `<span class="comment">-- Remove a table completely</span>
+<span class="keyword">DROP TABLE</span> Marks;`,
+                        info: [
+                            { label: 'Object', value: 'Table' },
+                            { label: 'Name', value: 'Marks' },
+                            { label: 'Warning', value: 'Irreversible!' }
+                        ],
+                        result: {
+                            type: 'error',
+                            title: 'Table Dropped',
+                            content: `<p>Table <strong>Marks</strong> has been permanently deleted.</p>
+                            <p>All data and structure have been removed.</p>
+                            <div style="background: #ffebee; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                                <strong>⚠️ Warning:</strong> This action cannot be undone. Always ensure you have backups before dropping tables.
+                            </div>`
+                        }
+                    },
+                    'DATABASE': {
+                        description: 'Permanently removes an entire database including all its tables and data.',
+                        code: `<span class="comment">-- Remove entire database</span>
+<span class="keyword">DROP DATABASE</span> University;`,
+                        info: [
+                            { label: 'Object', value: 'Database' },
+                            { label: 'Name', value: 'University' },
+                            { label: 'Warning', value: 'ALL DATA LOST!' }
+                        ],
+                        result: {
+                            type: 'error',
+                            title: 'Database Dropped',
+                            content: `<p>Database <strong>University</strong> has been permanently deleted.</p>
+                            <p>All tables and data within have been removed:</p>
+                            <ul>
+                                <li>Student table - DELETED</li>
+                                <li>Professor table - DELETED</li>
+                                <li>Course table - DELETED</li>
+                                <li>Marks table - DELETED</li>
+                            </ul>
+                            <div style="background: #ffebee; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                                <strong>⚠️ Critical Warning:</strong> Dropping a database removes ALL tables and ALL data permanently!
+                            </div>`
+                        }
+                    }
+                }
+            },
+            rename: {
+                subcommands: ['TABLE'],
+                examples: {
+                    'TABLE': {
+                        description: 'Changes the name of an existing table.',
+                        code: `<span class="comment">-- Rename a table</span>
+<span class="keyword">RENAME TABLE</span> Student <span class="keyword">TO</span> Students;
+
+<span class="comment">-- Another example</span>
+<span class="keyword">RENAME TABLE</span> Professor <span class="keyword">TO</span> Faculty;`,
+                        info: [
+                            { label: 'Old Name', value: 'Student' },
+                            { label: 'New Name', value: 'Students' },
+                            { label: 'Data', value: 'Preserved' }
+                        ],
+                        result: {
+                            type: 'success',
+                            title: 'Table Renamed Successfully',
+                            content: `<p>Table renamed from <strong>Student</strong> to <strong>Students</strong>.</p>
+                            <p>All data and structure have been preserved.</p>
+                            <div style="background: #e8f5e9; padding: 1rem; border-radius: 8px; margin-top: 1rem;">
+                                <strong>📝 Note:</strong> Remember to update any queries, views, or application code that reference the old table name.
+                            </div>`
+                        }
+                    }
+                }
+            }
+        };
+
+        let currentCommand = 'create';
+        let currentSubcommand = 'DATABASE';
+
+        function selectCommand(command) {
+            currentCommand = command;
+
+            // Update button states
+            document.querySelectorAll('.cmd-btn').forEach(btn => btn.classList.remove('active'));
+            document.querySelector(`.cmd-btn.${command}`).classList.add('active');
+
+            // Update subcommand selector
+            const subcommands = commands[command].subcommands;
+            const selector = document.getElementById('subcommand-selector');
+            selector.innerHTML = subcommands.map((sub, i) =>
+                `<button class="subcmd-btn ${i === 0 ? 'active' : ''}" onclick="selectSubcommand('${sub}')">${sub}</button>`
+            ).join('');
+
+            // Select first subcommand
+            currentSubcommand = subcommands[0];
+            updateDisplay();
+        }
+
+        function selectSubcommand(subcommand) {
+            currentSubcommand = subcommand;
+
+            // Update button states
+            document.querySelectorAll('.subcmd-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            updateDisplay();
+        }
+
+        function updateDisplay() {
+            const example = commands[currentCommand].examples[currentSubcommand];
+
+            // Update description
+            document.getElementById('description-panel').innerHTML = `
+                <h4>${currentCommand.toUpperCase()} ${currentSubcommand}</h4>
+                <p>${example.description}</p>
+            `;
+
+            // Update code
+            document.getElementById('code-display').innerHTML = example.code;
+
+            // Update info cards
+            document.getElementById('info-grid').innerHTML = example.info.map(item => `
+                <div class="info-card">
+                    <div class="label">${item.label}</div>
+                    <div class="value">${item.value}</div>
+                </div>
+            `).join('');
+
+            // Update result panel
+            const resultPanel = document.getElementById('result-panel');
+            resultPanel.className = `result-panel result-${example.result.type}`;
+            document.getElementById('result-title').textContent = example.result.title;
+            document.getElementById('result-content').innerHTML = example.result.content;
+        }
+
+        function executeCustomSQL() {
+            const sql = document.getElementById('sql-input').value.trim();
+            const resultDiv = document.getElementById('custom-result');
+            const contentDiv = document.getElementById('custom-result-content');
+
+            if (!sql) {
+                contentDiv.innerHTML = '<p style="color: #f44336;">Please enter a SQL statement.</p>';
+                resultDiv.style.display = 'block';
+                return;
+            }
+
+            // Simple parsing simulation
+            const upperSQL = sql.toUpperCase();
+            let message = '';
+
+            if (upperSQL.includes('CREATE DATABASE')) {
+                const match = sql.match(/CREATE\s+DATABASE\s+(\w+)/i);
+                const dbName = match ? match[1] : 'Unknown';
+                message = `<p style="color: #4caf50;">✓ Database <strong>${dbName}</strong> created successfully.</p>`;
+            } else if (upperSQL.includes('CREATE TABLE')) {
+                const match = sql.match(/CREATE\s+TABLE\s+(\w+)/i);
+                const tableName = match ? match[1] : 'Unknown';
+                message = `<p style="color: #4caf50;">✓ Table <strong>${tableName}</strong> created successfully.</p>`;
+            } else if (upperSQL.includes('ALTER TABLE')) {
+                const match = sql.match(/ALTER\s+TABLE\s+(\w+)/i);
+                const tableName = match ? match[1] : 'Unknown';
+                if (upperSQL.includes('ADD')) {
+                    message = `<p style="color: #4caf50;">✓ Column added to table <strong>${tableName}</strong>.</p>`;
+                } else if (upperSQL.includes('DROP')) {
+                    message = `<p style="color: #ff9800;">⚠ Column dropped from table <strong>${tableName}</strong>.</p>`;
+                } else {
+                    message = `<p style="color: #4caf50;">✓ Table <strong>${tableName}</strong> altered.</p>`;
+                }
+            } else if (upperSQL.includes('DROP TABLE')) {
+                const match = sql.match(/DROP\s+TABLE\s+(\w+)/i);
+                const tableName = match ? match[1] : 'Unknown';
+                message = `<p style="color: #f44336;">⚠ Table <strong>${tableName}</strong> dropped.</p>`;
+            } else if (upperSQL.includes('DROP DATABASE')) {
+                const match = sql.match(/DROP\s+DATABASE\s+(\w+)/i);
+                const dbName = match ? match[1] : 'Unknown';
+                message = `<p style="color: #f44336;">⚠ Database <strong>${dbName}</strong> dropped.</p>`;
+            } else if (upperSQL.includes('RENAME TABLE')) {
+                message = `<p style="color: #4caf50;">✓ Table renamed successfully.</p>`;
+            } else if (upperSQL.includes('USE')) {
+                const match = sql.match(/USE\s+(\w+)/i);
+                const dbName = match ? match[1] : 'Unknown';
+                message = `<p style="color: #4caf50;">✓ Now using database <strong>${dbName}</strong>.</p>`;
+            } else {
+                message = `<p style="color: #666;">Statement parsed. In a real database, this would be executed.</p>`;
+            }
+
+            contentDiv.innerHTML = message;
+            resultDiv.style.display = 'block';
+        }
+
+        // Initialize
+        selectCommand('create');
+    </script>
+</body>
+</html>

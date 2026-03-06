@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Data vs Information Interactive Demo</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .demo-container {
+            max-width: 900px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .transform-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .data-input-group {
+            display: grid;
+            grid-template-columns: 1fr auto 1fr;
+            gap: 1.5rem;
+            align-items: center;
+            margin: 2rem 0;
+        }
+
+        .data-box, .info-box {
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+        }
+
+        .data-box {
+            background: linear-gradient(135deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .info-box {
+            background: linear-gradient(135deg, #28a745, #20c997);
+            color: white;
+        }
+
+        .box-label {
+            font-size: 0.85rem;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            opacity: 0.9;
+            margin-bottom: 0.5rem;
+        }
+
+        .box-value {
+            font-size: 1.4rem;
+            font-weight: 700;
+            font-family: 'Fira Code', monospace;
+            word-break: break-all;
+        }
+
+        .arrow-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .transform-arrow {
+            font-size: 2.5rem;
+            color: var(--primary-color);
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.7; }
+        }
+
+        .processing-label {
+            font-size: 0.8rem;
+            color: var(--primary-color);
+            font-weight: 600;
+        }
+
+        .example-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.75rem;
+            justify-content: center;
+            margin: 1.5rem 0;
+        }
+
+        .example-btn {
+            padding: 0.75rem 1.25rem;
+            border: 2px solid var(--secondary-color);
+            background: white;
+            color: var(--primary-color);
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .example-btn:hover {
+            background: var(--secondary-color);
+            color: white;
+            transform: translateY(-2px);
+        }
+
+        .example-btn.active {
+            background: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
+        }
+
+        .custom-input-section {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            margin-top: 1.5rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .input-row {
+            display: flex;
+            gap: 1rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+
+        .input-row input {
+            flex: 1;
+            min-width: 200px;
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: 'Fira Code', monospace;
+        }
+
+        .input-row input:focus {
+            outline: none;
+            border-color: var(--secondary-color);
+        }
+
+        .input-row select {
+            padding: 0.75rem 1rem;
+            border: 2px solid var(--border-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+
+        .transform-btn {
+            padding: 0.75rem 1.5rem;
+            background: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .transform-btn:hover {
+            background: var(--accent-color);
+            transform: translateY(-2px);
+        }
+
+        .explanation-card {
+            background: var(--highlight-bg);
+            border-left: 4px solid var(--secondary-color);
+            padding: 1rem 1.5rem;
+            margin: 1.5rem 0;
+            border-radius: 0 8px 8px 0;
+        }
+
+        .data-types-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 1rem;
+            margin: 2rem 0;
+        }
+
+        .data-type-card {
+            background: white;
+            padding: 1.5rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .data-type-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        .data-type-card.selected {
+            border: 3px solid var(--secondary-color);
+        }
+
+        .type-icon {
+            font-size: 2.5rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .type-name {
+            font-weight: 600;
+            color: var(--primary-color);
+        }
+
+        .type-examples {
+            font-size: 0.85rem;
+            color: #666;
+            margin-top: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .data-input-group {
+                grid-template-columns: 1fr;
+            }
+
+            .arrow-container {
+                transform: rotate(90deg);
+            }
+
+            .input-row {
+                flex-direction: column;
+            }
+
+            .input-row input, .input-row select {
+                width: 100%;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="language-switcher">
+        <a href="../lectures/lecture1.html" class="lang-button">Back to Lecture</a>
+    </div>
+
+    <div class="demo-container">
+        <header style="text-align: center; margin-bottom: 2rem;">
+            <h1>Data vs Information</h1>
+            <p class="subtitle">Interactive Explorer - Transform Raw Data into Meaningful Information</p>
+        </header>
+
+        <section class="transform-section">
+            <h2 style="text-align: center; margin-top: 0;">Transformation Examples</h2>
+            <p style="text-align: center; color: #666;">Click an example to see how raw data becomes useful information</p>
+
+            <div class="example-buttons">
+                <button class="example-btn active" onclick="showExample('phone')">Phone Number</button>
+                <button class="example-btn" onclick="showExample('date')">Date</button>
+                <button class="example-btn" onclick="showExample('currency')">Currency</button>
+                <button class="example-btn" onclick="showExample('email')">Email</button>
+                <button class="example-btn" onclick="showExample('temperature')">Temperature</button>
+            </div>
+
+            <div class="data-input-group">
+                <div class="data-box">
+                    <div class="box-label">Raw Data</div>
+                    <div class="box-value" id="raw-data">5433333353</div>
+                </div>
+
+                <div class="arrow-container">
+                    <span class="transform-arrow">→</span>
+                    <span class="processing-label" id="process-label">Formatting</span>
+                </div>
+
+                <div class="info-box">
+                    <div class="box-label">Information</div>
+                    <div class="box-value" id="processed-info">(543) 333-3353</div>
+                </div>
+            </div>
+
+            <div class="explanation-card" id="explanation">
+                <strong>Why it matters:</strong> The formatted phone number is instantly recognizable and usable, while the raw digits require mental processing to understand.
+            </div>
+        </section>
+
+        <section class="transform-section">
+            <h2 style="text-align: center; margin-top: 0;">Try Your Own Data</h2>
+
+            <div class="custom-input-section">
+                <div class="input-row">
+                    <input type="text" id="custom-input" placeholder="Enter raw data (e.g., 19901225)">
+                    <select id="transform-type">
+                        <option value="phone">Phone Number</option>
+                        <option value="date">Date (YYYYMMDD)</option>
+                        <option value="currency">Currency</option>
+                        <option value="time">Time (HHMM)</option>
+                        <option value="creditcard">Credit Card</option>
+                    </select>
+                    <button class="transform-btn" onclick="transformCustom()">Transform</button>
+                </div>
+            </div>
+
+            <div class="data-input-group" id="custom-result" style="display: none;">
+                <div class="data-box">
+                    <div class="box-label">Your Raw Data</div>
+                    <div class="box-value" id="custom-raw"></div>
+                </div>
+
+                <div class="arrow-container">
+                    <span class="transform-arrow">→</span>
+                    <span class="processing-label">Processing</span>
+                </div>
+
+                <div class="info-box">
+                    <div class="box-label">Transformed Information</div>
+                    <div class="box-value" id="custom-info"></div>
+                </div>
+            </div>
+        </section>
+
+        <section class="transform-section">
+            <h2 style="text-align: center; margin-top: 0;">Types of Data</h2>
+            <p style="text-align: center; color: #666;">Different forms data can take in a database</p>
+
+            <div class="data-types-grid">
+                <div class="data-type-card" onclick="selectType(this, 'alphanumeric')">
+                    <div class="type-icon">🔤</div>
+                    <div class="type-name">Alphanumeric</div>
+                    <div class="type-examples">Names, IDs, Addresses</div>
+                </div>
+                <div class="data-type-card" onclick="selectType(this, 'image')">
+                    <div class="type-icon">🖼️</div>
+                    <div class="type-name">Image</div>
+                    <div class="type-examples">Photos, Logos, Diagrams</div>
+                </div>
+                <div class="data-type-card" onclick="selectType(this, 'audio')">
+                    <div class="type-icon">🔊</div>
+                    <div class="type-name">Audio</div>
+                    <div class="type-examples">Music, Voice, Sounds</div>
+                </div>
+                <div class="data-type-card" onclick="selectType(this, 'video')">
+                    <div class="type-icon">🎬</div>
+                    <div class="type-name">Video</div>
+                    <div class="type-examples">Movies, Clips, Streams</div>
+                </div>
+            </div>
+        </section>
+
+        <div class="key-message">
+            <h3>Key Concept</h3>
+            <p style="font-size: 1.2rem; text-align: center;">
+                <strong>Data + Context + Processing = Information</strong>
+            </p>
+            <p style="text-align: center;">
+                The same raw data can become different information depending on how it's processed and interpreted.
+            </p>
+        </div>
+
+        <footer style="text-align: center; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+            <p><a href="../lectures/lecture1.html">← Back to Lecture 1</a> | <a href="../index.html">Course Home</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const examples = {
+            phone: {
+                raw: '5433333353',
+                info: '(543) 333-3353',
+                process: 'Formatting',
+                explanation: 'The formatted phone number is instantly recognizable and usable, while the raw digits require mental processing to understand.'
+            },
+            date: {
+                raw: '19900515',
+                info: 'May 15, 1990',
+                process: 'Date Parsing',
+                explanation: 'A human-readable date format immediately conveys meaning - we understand it\'s a birthday or event date without needing to decode numbers.'
+            },
+            currency: {
+                raw: '15999',
+                info: '$159.99',
+                process: 'Currency Format',
+                explanation: 'Adding currency symbol and decimal makes the price immediately understandable for purchasing decisions.'
+            },
+            email: {
+                raw: 'ahmeddomain2023user',
+                info: 'ahmed.user@domain.com (2023)',
+                process: 'Structure Analysis',
+                explanation: 'Parsing the components reveals a username, domain, and registration year - turning a string into contact information with context.'
+            },
+            temperature: {
+                raw: '3725',
+                info: '37.25°C (Normal Body Temp)',
+                process: 'Unit Conversion + Context',
+                explanation: 'Adding decimal point, unit, and medical context transforms numbers into actionable health information.'
+            }
+        };
+
+        function showExample(type) {
+            // Update buttons
+            document.querySelectorAll('.example-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // Update display
+            const example = examples[type];
+            document.getElementById('raw-data').textContent = example.raw;
+            document.getElementById('processed-info').textContent = example.info;
+            document.getElementById('process-label').textContent = example.process;
+            document.getElementById('explanation').innerHTML = '<strong>Why it matters:</strong> ' + example.explanation;
+        }
+
+        function transformCustom() {
+            const input = document.getElementById('custom-input').value;
+            const type = document.getElementById('transform-type').value;
+
+            if (!input) {
+                alert('Please enter some data to transform');
+                return;
+            }
+
+            let result = '';
+            const digits = input.replace(/\D/g, '');
+
+            switch(type) {
+                case 'phone':
+                    if (digits.length >= 10) {
+                        result = `(${digits.slice(0,3)}) ${digits.slice(3,6)}-${digits.slice(6,10)}`;
+                    } else {
+                        result = 'Need 10+ digits for phone';
+                    }
+                    break;
+                case 'date':
+                    if (digits.length >= 8) {
+                        const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+                        const year = digits.slice(0,4);
+                        const month = parseInt(digits.slice(4,6)) - 1;
+                        const day = digits.slice(6,8);
+                        result = `${months[month]} ${parseInt(day)}, ${year}`;
+                    } else {
+                        result = 'Need YYYYMMDD format';
+                    }
+                    break;
+                case 'currency':
+                    if (digits.length > 0) {
+                        const amount = parseInt(digits);
+                        result = '$' + (amount / 100).toFixed(2);
+                    } else {
+                        result = 'Enter a number';
+                    }
+                    break;
+                case 'time':
+                    if (digits.length >= 4) {
+                        const hours = parseInt(digits.slice(0,2));
+                        const mins = digits.slice(2,4);
+                        const period = hours >= 12 ? 'PM' : 'AM';
+                        const hour12 = hours > 12 ? hours - 12 : (hours === 0 ? 12 : hours);
+                        result = `${hour12}:${mins} ${period}`;
+                    } else {
+                        result = 'Need HHMM format';
+                    }
+                    break;
+                case 'creditcard':
+                    if (digits.length >= 16) {
+                        result = `${digits.slice(0,4)} ${digits.slice(4,8)} ${digits.slice(8,12)} ${digits.slice(12,16)}`;
+                    } else {
+                        result = 'Need 16 digits';
+                    }
+                    break;
+            }
+
+            document.getElementById('custom-raw').textContent = input;
+            document.getElementById('custom-info').textContent = result;
+            document.getElementById('custom-result').style.display = 'grid';
+        }
+
+        function selectType(element, type) {
+            document.querySelectorAll('.data-type-card').forEach(card => card.classList.remove('selected'));
+            element.classList.add('selected');
+        }
+    </script>
+</body>
+</html>

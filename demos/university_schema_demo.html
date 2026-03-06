@@ -1,0 +1,770 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>University Database Schema Demo</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <style>
+        .demo-container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .schema-section {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 16px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        /* Table Grid */
+        .tables-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .table-card {
+            background: white;
+            border-radius: 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            overflow: hidden;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            border: 3px solid transparent;
+        }
+
+        .table-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        .table-card.active {
+            border-color: var(--secondary-color);
+        }
+
+        .table-header {
+            background: var(--primary-color);
+            color: white;
+            padding: 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+
+        .table-header .icon {
+            font-size: 1.5rem;
+        }
+
+        .table-header h3 {
+            margin: 0;
+            font-size: 1.2rem;
+        }
+
+        .table-body {
+            padding: 0;
+        }
+
+        .table-body table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+
+        .table-body th {
+            background: #f5f5f5;
+            padding: 0.75rem;
+            text-align: left;
+            font-size: 0.85rem;
+            color: #666;
+            border-bottom: 2px solid #e0e0e0;
+        }
+
+        .table-body td {
+            padding: 0.75rem;
+            border-bottom: 1px solid #eee;
+        }
+
+        .table-body tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* Column Types */
+        .col-pk {
+            background: #fff3e0;
+            font-weight: 600;
+        }
+
+        .col-pk::after {
+            content: ' 🔑';
+            font-size: 0.8rem;
+        }
+
+        .col-fk {
+            background: #e3f2fd;
+        }
+
+        .col-fk::after {
+            content: ' 🔗';
+            font-size: 0.8rem;
+        }
+
+        .col-pk.col-fk {
+            background: linear-gradient(135deg, #fff3e0 50%, #e3f2fd 50%);
+        }
+
+        /* Legend */
+        .legend {
+            display: flex;
+            gap: 2rem;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin: 1.5rem 0;
+            padding: 1rem;
+            background: white;
+            border-radius: 8px;
+        }
+
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .legend-color {
+            width: 24px;
+            height: 24px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+        }
+
+        .legend-color.pk { background: #fff3e0; }
+        .legend-color.fk { background: #e3f2fd; }
+
+        /* Detail Panel */
+        .detail-panel {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1.5rem 0;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .detail-panel h3 {
+            margin-top: 0;
+            color: var(--primary-color);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        /* Code Display */
+        .code-display {
+            background: #1e1e1e;
+            border-radius: 12px;
+            padding: 1.5rem;
+            margin: 1rem 0;
+            overflow-x: auto;
+        }
+
+        .code-display pre {
+            margin: 0;
+            font-family: 'Consolas', 'Monaco', monospace;
+            font-size: 0.95rem;
+            line-height: 1.6;
+            color: #d4d4d4;
+            white-space: pre-wrap;
+        }
+
+        .code-display .keyword { color: #569cd6; font-weight: bold; }
+        .code-display .string { color: #ce9178; }
+        .code-display .number { color: #b5cea8; }
+        .code-display .comment { color: #6a9955; font-style: italic; }
+        .code-display .datatype { color: #4ec9b0; }
+        .code-display .constraint { color: #c586c0; }
+
+        /* Relationship Diagram */
+        .relationship-diagram {
+            background: white;
+            border-radius: 12px;
+            padding: 2rem;
+            margin: 1.5rem 0;
+            text-align: center;
+        }
+
+        .diagram-svg {
+            max-width: 100%;
+            height: auto;
+        }
+
+        /* Stats */
+        .stats-row {
+            display: flex;
+            gap: 1.5rem;
+            justify-content: center;
+            margin: 1.5rem 0;
+            flex-wrap: wrap;
+        }
+
+        .stat-card {
+            background: white;
+            padding: 1rem 2rem;
+            border-radius: 12px;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            min-width: 120px;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: var(--primary-color);
+        }
+
+        .stat-label {
+            font-size: 0.85rem;
+            color: #666;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        /* Instructions */
+        .instructions {
+            background: var(--highlight-bg);
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-left: 4px solid var(--secondary-color);
+        }
+
+        .instructions h4 {
+            margin: 0 0 0.5rem 0;
+            color: var(--primary-color);
+        }
+
+        /* Complete Schema Button */
+        .show-all-btn {
+            display: block;
+            margin: 1.5rem auto;
+            padding: 1rem 2rem;
+            background: var(--secondary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        .show-all-btn:hover {
+            background: var(--primary-color);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 768px) {
+            .tables-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .stats-row {
+                flex-direction: column;
+                align-items: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="language-switcher">
+        <a href="../lectures/lecture2.html" class="lang-button">Back to Lecture</a>
+    </div>
+
+    <div class="demo-container">
+        <header style="text-align: center; margin-bottom: 2rem;">
+            <h1>University Database Schema</h1>
+            <p class="subtitle">Interactive Demo - Visualize Tables and Relationships</p>
+        </header>
+
+        <!-- Overview Stats -->
+        <section class="schema-section">
+            <h2 style="text-align: center; margin-top: 0;">Schema Overview</h2>
+
+            <div class="stats-row">
+                <div class="stat-card">
+                    <div class="stat-value">4</div>
+                    <div class="stat-label">Tables</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">11</div>
+                    <div class="stat-label">Columns</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">4</div>
+                    <div class="stat-label">Primary Keys</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value">3</div>
+                    <div class="stat-label">Foreign Keys</div>
+                </div>
+            </div>
+
+            <div class="instructions">
+                <h4>How to Use:</h4>
+                <ul style="margin: 0; padding-left: 1.5rem;">
+                    <li>Click on any <strong>table card</strong> to see its CREATE statement</li>
+                    <li><span style="background: #fff3e0; padding: 2px 6px; border-radius: 4px;">Orange</span> columns are Primary Keys (PK)</li>
+                    <li><span style="background: #e3f2fd; padding: 2px 6px; border-radius: 4px;">Blue</span> columns are Foreign Keys (FK)</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Tables Grid -->
+        <section class="schema-section">
+            <h2 style="text-align: center; margin-top: 0;">Database Tables</h2>
+            <p style="text-align: center; color: #666;">Click a table to view its SQL CREATE statement</p>
+
+            <div class="legend">
+                <div class="legend-item">
+                    <div class="legend-color pk">🔑</div>
+                    <span>Primary Key</span>
+                </div>
+                <div class="legend-item">
+                    <div class="legend-color fk">🔗</div>
+                    <span>Foreign Key</span>
+                </div>
+            </div>
+
+            <div class="tables-grid">
+                <!-- Student Table -->
+                <div class="table-card" id="student-card" onclick="selectTable('student')">
+                    <div class="table-header">
+                        <span class="icon">👤</span>
+                        <h3>Student</h3>
+                    </div>
+                    <div class="table-body">
+                        <table>
+                            <tr>
+                                <th>Column</th>
+                                <th>Type</th>
+                            </tr>
+                            <tr>
+                                <td class="col-pk">Sid</td>
+                                <td>INTEGER</td>
+                            </tr>
+                            <tr>
+                                <td>sname</td>
+                                <td>VARCHAR(100)</td>
+                            </tr>
+                            <tr>
+                                <td>age</td>
+                                <td>INTEGER</td>
+                            </tr>
+                            <tr>
+                                <td>sex</td>
+                                <td>VARCHAR(10)</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Professor Table -->
+                <div class="table-card" id="professor-card" onclick="selectTable('professor')">
+                    <div class="table-header">
+                        <span class="icon">👨‍🏫</span>
+                        <h3>Professor</h3>
+                    </div>
+                    <div class="table-body">
+                        <table>
+                            <tr>
+                                <th>Column</th>
+                                <th>Type</th>
+                            </tr>
+                            <tr>
+                                <td class="col-pk">Pid</td>
+                                <td>INTEGER</td>
+                            </tr>
+                            <tr>
+                                <td>pname</td>
+                                <td>VARCHAR(100)</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Course Table -->
+                <div class="table-card" id="course-card" onclick="selectTable('course')">
+                    <div class="table-header">
+                        <span class="icon">📚</span>
+                        <h3>Course</h3>
+                    </div>
+                    <div class="table-body">
+                        <table>
+                            <tr>
+                                <th>Column</th>
+                                <th>Type</th>
+                            </tr>
+                            <tr>
+                                <td class="col-pk">Cid</td>
+                                <td>INTEGER</td>
+                            </tr>
+                            <tr>
+                                <td>cname</td>
+                                <td>VARCHAR(100)</td>
+                            </tr>
+                            <tr>
+                                <td class="col-fk">Pid</td>
+                                <td>INTEGER</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Marks Table -->
+                <div class="table-card" id="marks-card" onclick="selectTable('marks')">
+                    <div class="table-header">
+                        <span class="icon">📊</span>
+                        <h3>Marks</h3>
+                    </div>
+                    <div class="table-body">
+                        <table>
+                            <tr>
+                                <th>Column</th>
+                                <th>Type</th>
+                            </tr>
+                            <tr>
+                                <td class="col-pk col-fk">Sid</td>
+                                <td>INTEGER</td>
+                            </tr>
+                            <tr>
+                                <td class="col-pk col-fk">Cid</td>
+                                <td>INTEGER</td>
+                            </tr>
+                            <tr>
+                                <td>marks</td>
+                                <td>INTEGER</td>
+                            </tr>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Detail Panel -->
+        <section class="schema-section">
+            <h2 style="margin-top: 0;">SQL CREATE Statement</h2>
+
+            <div class="detail-panel" id="detail-panel">
+                <h3><span id="detail-icon">📋</span> <span id="detail-title">Select a Table</span></h3>
+                <p id="detail-description">Click on a table above to see its CREATE statement.</p>
+
+                <div class="code-display" id="code-display" style="display: none;">
+                    <pre id="code-content"></pre>
+                </div>
+
+                <div id="detail-info"></div>
+            </div>
+        </section>
+
+        <!-- Relationships Diagram -->
+        <section class="schema-section">
+            <h2 style="text-align: center; margin-top: 0;">Table Relationships</h2>
+
+            <div class="relationship-diagram">
+                <svg class="diagram-svg" viewBox="0 0 600 300" xmlns="http://www.w3.org/2000/svg">
+                    <!-- Student Box -->
+                    <rect x="20" y="20" width="120" height="80" rx="8" fill="#fff" stroke="#1a237e" stroke-width="2"/>
+                    <rect x="20" y="20" width="120" height="30" rx="8" fill="#1a237e"/>
+                    <text x="80" y="42" text-anchor="middle" fill="white" font-weight="bold" font-size="14">Student</text>
+                    <text x="80" y="65" text-anchor="middle" fill="#333" font-size="11">Sid (PK)</text>
+                    <text x="80" y="82" text-anchor="middle" fill="#666" font-size="10">sname, age, sex</text>
+
+                    <!-- Professor Box -->
+                    <rect x="460" y="20" width="120" height="80" rx="8" fill="#fff" stroke="#1a237e" stroke-width="2"/>
+                    <rect x="460" y="20" width="120" height="30" rx="8" fill="#1a237e"/>
+                    <text x="520" y="42" text-anchor="middle" fill="white" font-weight="bold" font-size="14">Professor</text>
+                    <text x="520" y="65" text-anchor="middle" fill="#333" font-size="11">Pid (PK)</text>
+                    <text x="520" y="82" text-anchor="middle" fill="#666" font-size="10">pname</text>
+
+                    <!-- Course Box -->
+                    <rect x="360" y="200" width="120" height="80" rx="8" fill="#fff" stroke="#1a237e" stroke-width="2"/>
+                    <rect x="360" y="200" width="120" height="30" rx="8" fill="#1a237e"/>
+                    <text x="420" y="222" text-anchor="middle" fill="white" font-weight="bold" font-size="14">Course</text>
+                    <text x="420" y="245" text-anchor="middle" fill="#333" font-size="11">Cid (PK), Pid (FK)</text>
+                    <text x="420" y="262" text-anchor="middle" fill="#666" font-size="10">cname</text>
+
+                    <!-- Marks Box -->
+                    <rect x="120" y="200" width="140" height="80" rx="8" fill="#fff" stroke="#1a237e" stroke-width="2"/>
+                    <rect x="120" y="200" width="140" height="30" rx="8" fill="#1a237e"/>
+                    <text x="190" y="222" text-anchor="middle" fill="white" font-weight="bold" font-size="14">Marks</text>
+                    <text x="190" y="245" text-anchor="middle" fill="#333" font-size="11">Sid+Cid (PK)</text>
+                    <text x="190" y="262" text-anchor="middle" fill="#666" font-size="10">marks</text>
+
+                    <!-- Relationship Lines -->
+                    <!-- Student to Marks -->
+                    <line x1="80" y1="100" x2="80" y2="140" stroke="#2196f3" stroke-width="2"/>
+                    <line x1="80" y1="140" x2="150" y2="140" stroke="#2196f3" stroke-width="2"/>
+                    <line x1="150" y1="140" x2="150" y2="200" stroke="#2196f3" stroke-width="2"/>
+                    <polygon points="150,200 145,190 155,190" fill="#2196f3"/>
+                    <text x="100" y="135" fill="#2196f3" font-size="10">1:N</text>
+
+                    <!-- Course to Marks -->
+                    <line x1="360" y1="240" x2="260" y2="240" stroke="#2196f3" stroke-width="2"/>
+                    <polygon points="260,240 270,235 270,245" fill="#2196f3"/>
+                    <text x="310" y="235" fill="#2196f3" font-size="10">1:N</text>
+
+                    <!-- Professor to Course -->
+                    <line x1="520" y1="100" x2="520" y2="140" stroke="#2196f3" stroke-width="2"/>
+                    <line x1="520" y1="140" x2="420" y2="140" stroke="#2196f3" stroke-width="2"/>
+                    <line x1="420" y1="140" x2="420" y2="200" stroke="#2196f3" stroke-width="2"/>
+                    <polygon points="420,200 415,190 425,190" fill="#2196f3"/>
+                    <text x="480" y="135" fill="#2196f3" font-size="10">1:N</text>
+                </svg>
+            </div>
+
+            <div style="text-align: center; color: #666;">
+                <p><strong>Relationships:</strong></p>
+                <ul style="list-style: none; padding: 0;">
+                    <li>A <strong>Professor</strong> teaches many <strong>Courses</strong> (1:N)</li>
+                    <li>A <strong>Student</strong> has many <strong>Marks</strong> entries (1:N)</li>
+                    <li>A <strong>Course</strong> has many <strong>Marks</strong> entries (1:N)</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Complete Schema -->
+        <section class="schema-section">
+            <h2 style="text-align: center; margin-top: 0;">Complete Schema Script</h2>
+            <p style="text-align: center; color: #666;">The full SQL script to create the entire University database</p>
+
+            <button class="show-all-btn" onclick="toggleFullSchema()">Show Complete SQL Script</button>
+
+            <div id="full-schema" style="display: none;">
+                <div class="code-display">
+                    <pre><span class="comment">-- =============================================</span>
+<span class="comment">-- University Database Schema</span>
+<span class="comment">-- =============================================</span>
+
+<span class="comment">-- Step 1: Create the database</span>
+<span class="keyword">CREATE DATABASE</span> University;
+<span class="keyword">USE</span> University;
+
+<span class="comment">-- Step 2: Create tables without foreign key dependencies first</span>
+
+<span class="comment">-- Student table</span>
+<span class="keyword">CREATE TABLE</span> Student (
+    Sid     <span class="datatype">INTEGER</span> <span class="constraint">PRIMARY KEY</span>,
+    sname   <span class="datatype">VARCHAR</span>(<span class="number">100</span>),
+    age     <span class="datatype">INTEGER</span>,
+    sex     <span class="datatype">VARCHAR</span>(<span class="number">10</span>)
+);
+
+<span class="comment">-- Professor table</span>
+<span class="keyword">CREATE TABLE</span> Professor (
+    Pid     <span class="datatype">INTEGER</span> <span class="constraint">PRIMARY KEY</span>,
+    pname   <span class="datatype">VARCHAR</span>(<span class="number">100</span>)
+);
+
+<span class="comment">-- Step 3: Create tables with foreign key dependencies</span>
+
+<span class="comment">-- Course table (depends on Professor)</span>
+<span class="keyword">CREATE TABLE</span> Course (
+    Cid     <span class="datatype">INTEGER</span> <span class="constraint">PRIMARY KEY</span>,
+    cname   <span class="datatype">VARCHAR</span>(<span class="number">100</span>),
+    Pid     <span class="datatype">INTEGER</span>,
+    <span class="constraint">FOREIGN KEY</span> (Pid) <span class="keyword">REFERENCES</span> Professor(Pid)
+);
+
+<span class="comment">-- Marks table (depends on Student and Course)</span>
+<span class="keyword">CREATE TABLE</span> Marks (
+    Sid     <span class="datatype">INTEGER</span>,
+    Cid     <span class="datatype">INTEGER</span>,
+    marks   <span class="datatype">INTEGER</span>,
+    <span class="constraint">PRIMARY KEY</span> (Sid, Cid),
+    <span class="constraint">FOREIGN KEY</span> (Sid) <span class="keyword">REFERENCES</span> Student(Sid),
+    <span class="constraint">FOREIGN KEY</span> (Cid) <span class="keyword">REFERENCES</span> Course(Cid)
+);
+
+<span class="comment">-- =============================================</span>
+<span class="comment">-- Schema creation complete!</span>
+<span class="comment">-- =============================================</span></pre>
+                </div>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <div class="key-message">
+            <h3>Key Points</h3>
+            <p style="text-align: center;">
+                <strong>Primary Keys</strong> uniquely identify each row<br>
+                <strong>Foreign Keys</strong> create relationships between tables<br>
+                <strong>Creation Order</strong> matters when tables have dependencies
+            </p>
+        </div>
+
+        <footer style="text-align: center; margin-top: 2rem; padding-top: 1rem; border-top: 1px solid var(--border-color);">
+            <p><a href="../lectures/lecture2.html">← Back to Lecture 2</a> | <a href="ddl_commands_demo.html">DDL Commands Demo</a> | <a href="../index.html">Course Home</a></p>
+        </footer>
+    </div>
+
+    <script>
+        const tables = {
+            student: {
+                icon: '👤',
+                title: 'Student Table',
+                description: 'Stores student information. The Sid (Student ID) is the primary key that uniquely identifies each student.',
+                code: `<span class="comment">-- Create the Student table</span>
+<span class="keyword">CREATE TABLE</span> Student (
+    Sid     <span class="datatype">INTEGER</span> <span class="constraint">PRIMARY KEY</span>,
+    sname   <span class="datatype">VARCHAR</span>(<span class="number">100</span>),
+    age     <span class="datatype">INTEGER</span>,
+    sex     <span class="datatype">VARCHAR</span>(<span class="number">10</span>)
+);`,
+                info: `
+                    <div class="stats-row" style="margin-top: 1rem;">
+                        <div class="stat-card">
+                            <div class="stat-value">4</div>
+                            <div class="stat-label">Columns</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">Sid</div>
+                            <div class="stat-label">Primary Key</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">0</div>
+                            <div class="stat-label">Foreign Keys</div>
+                        </div>
+                    </div>
+                `
+            },
+            professor: {
+                icon: '👨‍🏫',
+                title: 'Professor Table',
+                description: 'Stores professor information. The Pid (Professor ID) is the primary key. This table is referenced by the Course table.',
+                code: `<span class="comment">-- Create the Professor table</span>
+<span class="keyword">CREATE TABLE</span> Professor (
+    Pid     <span class="datatype">INTEGER</span> <span class="constraint">PRIMARY KEY</span>,
+    pname   <span class="datatype">VARCHAR</span>(<span class="number">100</span>)
+);`,
+                info: `
+                    <div class="stats-row" style="margin-top: 1rem;">
+                        <div class="stat-card">
+                            <div class="stat-value">2</div>
+                            <div class="stat-label">Columns</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">Pid</div>
+                            <div class="stat-label">Primary Key</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">1</div>
+                            <div class="stat-label">Referenced By</div>
+                        </div>
+                    </div>
+                `
+            },
+            course: {
+                icon: '📚',
+                title: 'Course Table',
+                description: 'Stores course information. Each course is taught by a professor (Pid references Professor table). Cid is the primary key.',
+                code: `<span class="comment">-- Create the Course table</span>
+<span class="comment">-- Note: Professor table must exist first</span>
+<span class="keyword">CREATE TABLE</span> Course (
+    Cid     <span class="datatype">INTEGER</span> <span class="constraint">PRIMARY KEY</span>,
+    cname   <span class="datatype">VARCHAR</span>(<span class="number">100</span>),
+    Pid     <span class="datatype">INTEGER</span>,
+    <span class="constraint">FOREIGN KEY</span> (Pid) <span class="keyword">REFERENCES</span> Professor(Pid)
+);`,
+                info: `
+                    <div class="stats-row" style="margin-top: 1rem;">
+                        <div class="stat-card">
+                            <div class="stat-value">3</div>
+                            <div class="stat-label">Columns</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">Cid</div>
+                            <div class="stat-label">Primary Key</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">Pid</div>
+                            <div class="stat-label">Foreign Key</div>
+                        </div>
+                    </div>
+                    <p style="margin-top: 1rem; color: #666;"><strong>Dependency:</strong> Requires Professor table to exist first.</p>
+                `
+            },
+            marks: {
+                icon: '📊',
+                title: 'Marks Table',
+                description: 'Stores student grades for courses. Uses a composite primary key (Sid + Cid) and has two foreign keys referencing Student and Course tables.',
+                code: `<span class="comment">-- Create the Marks table</span>
+<span class="comment">-- Note: Student and Course tables must exist first</span>
+<span class="keyword">CREATE TABLE</span> Marks (
+    Sid     <span class="datatype">INTEGER</span>,
+    Cid     <span class="datatype">INTEGER</span>,
+    marks   <span class="datatype">INTEGER</span>,
+    <span class="constraint">PRIMARY KEY</span> (Sid, Cid),
+    <span class="constraint">FOREIGN KEY</span> (Sid) <span class="keyword">REFERENCES</span> Student(Sid),
+    <span class="constraint">FOREIGN KEY</span> (Cid) <span class="keyword">REFERENCES</span> Course(Cid)
+);`,
+                info: `
+                    <div class="stats-row" style="margin-top: 1rem;">
+                        <div class="stat-card">
+                            <div class="stat-value">3</div>
+                            <div class="stat-label">Columns</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">Sid+Cid</div>
+                            <div class="stat-label">Composite PK</div>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-value">2</div>
+                            <div class="stat-label">Foreign Keys</div>
+                        </div>
+                    </div>
+                    <p style="margin-top: 1rem; color: #666;"><strong>Dependencies:</strong> Requires both Student and Course tables to exist first.</p>
+                `
+            }
+        };
+
+        let currentTable = null;
+
+        function selectTable(tableName) {
+            currentTable = tableName;
+
+            // Update card states
+            document.querySelectorAll('.table-card').forEach(card => card.classList.remove('active'));
+            document.getElementById(tableName + '-card').classList.add('active');
+
+            // Update detail panel
+            const table = tables[tableName];
+            document.getElementById('detail-icon').textContent = table.icon;
+            document.getElementById('detail-title').textContent = table.title;
+            document.getElementById('detail-description').textContent = table.description;
+
+            const codeDisplay = document.getElementById('code-display');
+            codeDisplay.style.display = 'block';
+            document.getElementById('code-content').innerHTML = table.code;
+
+            document.getElementById('detail-info').innerHTML = table.info;
+        }
+
+        function toggleFullSchema() {
+            const schema = document.getElementById('full-schema');
+            const btn = document.querySelector('.show-all-btn');
+
+            if (schema.style.display === 'none') {
+                schema.style.display = 'block';
+                btn.textContent = 'Hide Complete SQL Script';
+            } else {
+                schema.style.display = 'none';
+                btn.textContent = 'Show Complete SQL Script';
+            }
+        }
+    </script>
+</body>
+</html>
