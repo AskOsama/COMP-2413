@@ -1,0 +1,828 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>المحاضرة 4: حذف وتحديث البيانات ولغة التحكم في SQL</title>
+    <link rel="stylesheet" href="../css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="lecture4.html" class="lang-button" title="Switch to English">English</a>
+    </div>
+
+    <header>
+        <h1>حذف وتحديث البيانات ولغة التحكم في SQL</h1>
+        <p class="subtitle">المحاضرة 4: تعديل البيانات والتحكم في الوصول لقاعدة البيانات</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>المحتويات</h2>
+        <ul>
+            <li><a href="#objectives">أهداف التعلم</a></li>
+            <li><a href="#recap">1. مراجعة سريعة: أوامر DML</a></li>
+            <li><a href="#delete">2. عبارة DELETE - الحذف</a></li>
+            <li><a href="#delete-examples">3. أمثلة على DELETE</a></li>
+            <li><a href="#update-all">4. UPDATE - تحديث جميع الصفوف</a></li>
+            <li><a href="#update-specific">5. UPDATE - تحديث صفوف محددة</a></li>
+            <li><a href="#update-multiple">6. UPDATE - تحديث أعمدة متعددة</a></li>
+            <li><a href="#dcl">7. لغة التحكم في البيانات (DCL)</a></li>
+            <li><a href="#grant">8. أمر GRANT - منح الصلاحيات</a></li>
+            <li><a href="#revoke">9. أمر REVOKE - سحب الصلاحيات</a></li>
+            <li><a href="#sql-categories">10. ملخص فئات لغة SQL</a></li>
+            <li><a href="#exercises">تمارين</a></li>
+            <li><a href="#review">أسئلة المراجعة</a></li>
+            <li><a href="#summary">الملخص</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>أهداف التعلم</h2>
+            <p>بنهاية هذه المحاضرة، ستكون قادراً على:</p>
+            <ul>
+                <li>حذف السجلات من الجداول باستخدام عبارة DELETE مع الشروط</li>
+                <li>فهم خطورة DELETE بدون جملة WHERE</li>
+                <li>تحديث جميع الصفوف في جدول باستخدام UPDATE مع SET</li>
+                <li>تحديث صفوف محددة باستخدام UPDATE مع SET و WHERE</li>
+                <li>تحديث أعمدة متعددة في عبارة UPDATE واحدة</li>
+                <li>فهم لغة التحكم في البيانات (DCL) والغرض منها</li>
+                <li>منح الصلاحيات للمستخدمين باستخدام أمر GRANT</li>
+                <li>سحب الصلاحيات من المستخدمين باستخدام أمر REVOKE</li>
+                <li>التمييز بين فئات DML و DDL و DCL في لغة SQL</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: Quick Recap -->
+        <section id="recap" class="content-section">
+            <h2>1. مراجعة سريعة: أوامر DML</h2>
+
+            <div class="tip-box">
+                <h4>من المحاضرة 3</h4>
+                <p>في المحاضرة 3، تعلمنا <strong>INSERT INTO</strong> لإضافة البيانات و <strong>SELECT</strong> لاسترجاع البيانات (مع وبدون شروط WHERE). في هذه المحاضرة، نستكمل أوامر DML المتبقية ونقدم DCL.</p>
+            </div>
+
+            <h3>نظرة عامة على أوامر DML</h3>
+            <div class="concept-cards">
+                <div class="concept-card">
+                    <div class="icon">➕</div>
+                    <h4>INSERT</h4>
+                    <p>إضافة صفوف جديدة (المحاضرة 3)</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">🔍</div>
+                    <h4>SELECT</h4>
+                    <p>استرجاع البيانات (المحاضرة 3)</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">🗑️</div>
+                    <h4>DELETE</h4>
+                    <p>إزالة الصفوف (هذه المحاضرة)</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">✏️</div>
+                    <h4>UPDATE</h4>
+                    <p>تعديل البيانات (هذه المحاضرة)</p>
+                </div>
+            </div>
+
+            <h3>الجدول المستخدم: Student</h3>
+            <p>سنستمر في استخدام جدول الطلاب مع البيانات التالية:</p>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S_id</th>
+                            <th>s_name</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>4439601234</td>
+                            <td>Sarah Altalab</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601235</td>
+                            <td>Haya Aldoussari</td>
+                            <td>22</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601236</td>
+                            <td>Wafa Alothman</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 2: DELETE Statement -->
+        <section id="delete" class="content-section">
+            <h2>2. عبارة DELETE - الحذف</h2>
+
+            <div class="definition">
+                <h4>تعريف: DELETE</h4>
+                <p>عبارة <strong>DELETE</strong> تزيل صفاً واحداً أو أكثر من الجدول. عند استخدامها مع جملة <strong>WHERE</strong>، يتم حذف الصفوف التي تطابق الشرط فقط.</p>
+            </div>
+
+            <h3>الصيغة العامة</h3>
+            <div class="code-block">
+<span class="keyword">DELETE FROM</span> table_name
+<span class="keyword">WHERE</span> condition;
+            </div>
+
+            <div class="warning-box">
+                <h4>قواعد مهمة</h4>
+                <ul>
+                    <li>جملة WHERE تحدد <strong>أي الصفوف</strong> سيتم حذفها</li>
+                    <li>بدون جملة WHERE، يتم حذف <strong>جميع الصفوف</strong> في الجدول</li>
+                    <li>DELETE يزيل صفوفاً كاملة، وليس قيم أعمدة فردية</li>
+                    <li>يبقى هيكل الجدول كما هو بعد DELETE</li>
+                    <li>تحقق دائماً من شرط WHERE قبل التنفيذ</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 3: DELETE Examples -->
+        <section id="delete-examples" class="content-section">
+            <h2>3. أمثلة على DELETE</h2>
+
+            <div class="example">
+                <h4>مثال 1: حذف طالبة بالاسم</h4>
+                <p>اكتب أمر SQL لحذف الطالبة "Wafa Alothman":</p>
+                <div class="code-block">
+<span class="comment">-- حذف الطالبة المسماة 'Wafa Alothman'</span>
+<span class="keyword">DELETE FROM</span> student
+<span class="keyword">WHERE</span> s_name = <span class="string">'Wafa Alothman'</span>;
+                </div>
+            </div>
+
+            <h3>الجدول قبل DELETE</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S_id</th>
+                            <th>s_name</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>4439601234</td>
+                            <td>Sarah Altalab</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601235</td>
+                            <td>Haya Aldoussari</td>
+                            <td>22</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601236</td>
+                            <td>Wafa Alothman</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>الجدول بعد DELETE</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S_id</th>
+                            <th>s_name</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>4439601234</td>
+                            <td>Sarah Altalab</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601235</td>
+                            <td>Haya Aldoussari</td>
+                            <td>22</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="example">
+                <h4>مثال 2: الحذف بشرط</h4>
+                <p>حذف جميع الطالبات اللواتي عمرهن 21:</p>
+                <div class="code-block">
+<span class="comment">-- حذف جميع الطالبات بعمر 21</span>
+<span class="keyword">DELETE FROM</span> student
+<span class="keyword">WHERE</span> age = <span class="number">21</span>;
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <h4>تحذير: DELETE بدون WHERE</h4>
+                <p>إذا حذفت جملة WHERE، سيتم حذف <strong>جميع الصفوف</strong> في الجدول!</p>
+                <div class="code-block">
+<span class="comment">-- خطر: هذا يحذف جميع الصفوف من الجدول!</span>
+<span class="keyword">DELETE FROM</span> student;
+                </div>
+                <p>الجدول لا يزال موجوداً (هيكله محفوظ)، لكنه سيكون فارغاً تماماً. هذا يختلف عن <code>DROP TABLE</code> الذي يزيل الجدول بالكامل.</p>
+            </div>
+
+            <div class="key-message">
+                <h4>DELETE مقابل DROP</h4>
+                <p><strong>DELETE FROM table_name</strong> يزيل صفوف البيانات فقط لكن يحتفظ بهيكل الجدول. <strong>DROP TABLE table_name</strong> يزيل الجدول بالكامل (الهيكل + البيانات). استخدم DELETE عندما تريد مسح البيانات؛ واستخدم DROP عندما تريد إزالة الجدول نهائياً.</p>
+            </div>
+        </section>
+
+        <!-- Section 4: UPDATE All Rows -->
+        <section id="update-all" class="content-section">
+            <h2>4. UPDATE - تحديث جميع الصفوف</h2>
+
+            <div class="definition">
+                <h4>تعريف: UPDATE</h4>
+                <p>عبارة <strong>UPDATE</strong> تعدل البيانات الموجودة في الجدول. تستخدم جملة <strong>SET</strong> لتحديد الأعمدة المراد تغييرها وقيمها الجديدة.</p>
+            </div>
+
+            <h3>الصيغة 1: تحديث جميع الصفوف (بدون WHERE)</h3>
+            <div class="code-block">
+<span class="keyword">UPDATE</span> table_name
+<span class="keyword">SET</span> column1 = value1, column2 = value2;
+            </div>
+
+            <div class="example">
+                <h4>مثال: تعيين جميع الأسماء إلى 'Fatima'</h4>
+                <div class="code-block">
+<span class="comment">-- تحديث جميع أسماء الطالبات إلى 'Fatima'</span>
+<span class="keyword">UPDATE</span> student
+<span class="keyword">SET</span> s_name = <span class="string">'Fatima'</span>;
+                </div>
+            </div>
+
+            <h3>الجدول قبل UPDATE</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S_id</th>
+                            <th>s_name</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>4439601234</td>
+                            <td>Sarah Altalab</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601235</td>
+                            <td>Haya Aldoussari</td>
+                            <td>22</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601236</td>
+                            <td>Wafa Alothman</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>الجدول بعد UPDATE (جميع الصفوف)</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S_id</th>
+                            <th>s_name</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>4439601234</td>
+                            <td><strong>Fatima</strong></td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601235</td>
+                            <td><strong>Fatima</strong></td>
+                            <td>22</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601236</td>
+                            <td><strong>Fatima</strong></td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="warning-box">
+                <h4>انتبه!</h4>
+                <p>بدون جملة WHERE، يتم تحديث <strong>كل صف</strong> في الجدول. هذا عادةً ليس السلوك المطلوب. تأكد دائماً من أنك تريد تغيير جميع الصفوف قبل حذف WHERE.</p>
+            </div>
+        </section>
+
+        <!-- Section 5: UPDATE Specific Rows -->
+        <section id="update-specific" class="content-section">
+            <h2>5. UPDATE - تحديث صفوف محددة</h2>
+
+            <h3>الصيغة 2: تحديث صفوف محددة (مع WHERE)</h3>
+            <div class="code-block">
+<span class="keyword">UPDATE</span> table_name
+<span class="keyword">SET</span> column1 = value1, column2 = value2
+<span class="keyword">WHERE</span> condition;
+            </div>
+
+            <div class="example">
+                <h4>مثال: تحديث الاسم حيث العمر = 21</h4>
+                <div class="code-block">
+<span class="comment">-- تحديث الاسم إلى 'Fatima' فقط للطالبات بعمر 21</span>
+<span class="keyword">UPDATE</span> student
+<span class="keyword">SET</span> s_name = <span class="string">'Fatima'</span>
+<span class="keyword">WHERE</span> age = <span class="number">21</span>;
+                </div>
+            </div>
+
+            <h3>الجدول قبل UPDATE</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S_id</th>
+                            <th>s_name</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>4439601234</td>
+                            <td>Sarah Altalab</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601235</td>
+                            <td>Haya Aldoussari</td>
+                            <td>22</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601236</td>
+                            <td>Wafa Alothman</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>الجدول بعد UPDATE (صفوف محددة)</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S_id</th>
+                            <th>s_name</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>4439601234</td>
+                            <td><strong>Fatima</strong></td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601235</td>
+                            <td>Haya Aldoussari</td>
+                            <td>22</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601236</td>
+                            <td><strong>Fatima</strong></td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="key-message">
+                <h4>UPDATE مقابل DELETE</h4>
+                <p><strong>UPDATE</strong> يغير البيانات لكن يحتفظ بالصفوف. <strong>DELETE</strong> يزيل صفوفاً كاملة. كلاهما يستخدم WHERE لاستهداف صفوف محددة — وكلاهما يؤثر على جميع الصفوف عند حذف WHERE.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: UPDATE Multiple Columns -->
+        <section id="update-multiple" class="content-section">
+            <h2>6. UPDATE - تحديث أعمدة متعددة</h2>
+
+            <p>يمكنك تحديث أكثر من عمود في عبارة UPDATE واحدة بفصل تعيينات الأعمدة بفواصل.</p>
+
+            <h3>الصيغة العامة</h3>
+            <div class="code-block">
+<span class="keyword">UPDATE</span> table_name
+<span class="keyword">SET</span> column1 = value1, column2 = value2
+<span class="keyword">WHERE</span> condition;
+            </div>
+
+            <div class="example">
+                <h4>مثال: تحديث الاسم والعمر</h4>
+                <div class="code-block">
+<span class="comment">-- تحديث الاسم إلى 'Nora' والعمر إلى 23 للطالبة ذات الرقم '4439601235'</span>
+<span class="keyword">UPDATE</span> student
+<span class="keyword">SET</span> s_name = <span class="string">'Nora'</span>, age = <span class="number">23</span>
+<span class="keyword">WHERE</span> S_id = <span class="string">'4439601235'</span>;
+                </div>
+            </div>
+
+            <h3>الجدول بعد UPDATE (أعمدة متعددة)</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S_id</th>
+                            <th>s_name</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>4439601234</td>
+                            <td>Sarah Altalab</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601235</td>
+                            <td><strong>Nora</strong></td>
+                            <td><strong>23</strong></td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601236</td>
+                            <td>Wafa Alothman</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tip-box">
+                <h4>مرجع أوامر DML</h4>
+                <div class="table-demo">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>الأمر</th>
+                                <th>الغرض</th>
+                                <th>الصيغة</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>INSERT</strong></td>
+                                <td>إضافة صفوف جديدة</td>
+                                <td><code>INSERT INTO table VALUES (...);</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>SELECT</strong></td>
+                                <td>استرجاع البيانات</td>
+                                <td><code>SELECT columns FROM table WHERE ...;</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>UPDATE</strong></td>
+                                <td>تعديل البيانات</td>
+                                <td><code>UPDATE table SET col=val WHERE ...;</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>DELETE</strong></td>
+                                <td>إزالة صفوف</td>
+                                <td><code>DELETE FROM table WHERE ...;</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>LOCK</strong></td>
+                                <td>التحكم في تزامن الجداول</td>
+                                <td><code>LOCK TABLE table IN lock_mode;</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>CALL</strong></td>
+                                <td>استدعاء برنامج فرعي PL/SQL أو Java</td>
+                                <td><code>CALL procedure_name(arguments);</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>EXPLAIN PLAN</strong></td>
+                                <td>وصف مسار الوصول للبيانات</td>
+                                <td><code>EXPLAIN PLAN FOR SELECT * FROM table;</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7: DCL -->
+        <section id="dcl" class="content-section">
+            <h2>7. لغة التحكم في البيانات (DCL)</h2>
+
+            <div class="definition">
+                <h4>تعريف: DCL</h4>
+                <p><strong>لغة التحكم في البيانات (DCL)</strong> تتضمن أوامر مثل GRANT و REVOKE التي تتعامل بشكل رئيسي مع الحقوق والصلاحيات وعناصر التحكم الأخرى لنظام قاعدة البيانات. تُستخدم هذه الأوامر للتحكم في الوصول إلى البيانات عن طريق منح أو سحب الصلاحيات.</p>
+            </div>
+
+            <div class="concept-cards">
+                <div class="concept-card">
+                    <div class="icon">✅</div>
+                    <h4>GRANT - منح</h4>
+                    <p>يمنح صلاحيات محددة للمستخدمين، مما يسمح لهم بتنفيذ عمليات معينة على كائنات قاعدة البيانات</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">🚫</div>
+                    <h4>REVOKE - سحب</h4>
+                    <p>يزيل الصلاحيات الممنوحة مسبقاً من المستخدمين، مما يقيد وصولهم إلى كائنات قاعدة البيانات</p>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <h4>لماذا DCL مهمة</h4>
+                <p>في قواعد البيانات الحقيقية، لا ينبغي أن يكون لكل مستخدم وصول كامل. تسمح DCL لمسؤولي قواعد البيانات بتطبيق <strong>مبدأ الحد الأدنى من الصلاحيات</strong> — يحصل المستخدمون فقط على الصلاحيات التي يحتاجونها لأداء عملهم. هذا ضروري لأمان قاعدة البيانات.</p>
+            </div>
+        </section>
+
+        <!-- Section 8: GRANT -->
+        <section id="grant" class="content-section">
+            <h2>8. أمر GRANT - منح الصلاحيات</h2>
+
+            <p>أمر GRANT يمنح صلاحيات محددة للمستخدمين أو الأدوار على كائنات قاعدة البيانات.</p>
+
+            <h3>الصيغة العامة</h3>
+            <div class="code-block">
+<span class="keyword">GRANT</span> permission1, permission2, ...
+<span class="keyword">ON</span> object
+<span class="keyword">TO</span> user;
+            </div>
+
+            <h3>الصلاحيات الشائعة</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الصلاحية</th>
+                            <th>الوصف</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>SELECT</code></td>
+                            <td>صلاحية قراءة/استعلام البيانات من الجدول</td>
+                        </tr>
+                        <tr>
+                            <td><code>INSERT</code></td>
+                            <td>صلاحية إضافة صفوف جديدة إلى الجدول</td>
+                        </tr>
+                        <tr>
+                            <td><code>UPDATE</code></td>
+                            <td>صلاحية تعديل البيانات الموجودة في الجدول</td>
+                        </tr>
+                        <tr>
+                            <td><code>DELETE</code></td>
+                            <td>صلاحية إزالة صفوف من الجدول</td>
+                        </tr>
+                        <tr>
+                            <td><code>ALL PRIVILEGES</code></td>
+                            <td>جميع الصلاحيات المتاحة على الكائن</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="example">
+                <h4>أمثلة على GRANT</h4>
+                <div class="code-block">
+<span class="comment">-- منح صلاحية SELECT على جدول Student للمستخدم 'ahmed'</span>
+<span class="keyword">GRANT</span> <span class="keyword">SELECT</span>
+<span class="keyword">ON</span> student
+<span class="keyword">TO</span> ahmed;
+
+<span class="comment">-- منح صلاحيتي INSERT و UPDATE للمستخدم 'sara'</span>
+<span class="keyword">GRANT</span> <span class="keyword">INSERT</span>, <span class="keyword">UPDATE</span>
+<span class="keyword">ON</span> student
+<span class="keyword">TO</span> sara;
+
+<span class="comment">-- منح جميع الصلاحيات على جدول Student للمستخدم 'admin'</span>
+<span class="keyword">GRANT</span> <span class="keyword">ALL PRIVILEGES</span>
+<span class="keyword">ON</span> student
+<span class="keyword">TO</span> admin;
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 9: REVOKE -->
+        <section id="revoke" class="content-section">
+            <h2>9. أمر REVOKE - سحب الصلاحيات</h2>
+
+            <p>أمر REVOKE يزيل الصلاحيات الممنوحة مسبقاً من المستخدمين أو الأدوار.</p>
+
+            <h3>الصيغة العامة</h3>
+            <div class="code-block">
+<span class="keyword">REVOKE</span> permission1, permission2, ...
+<span class="keyword">ON</span> object
+<span class="keyword">FROM</span> user;
+            </div>
+
+            <div class="example">
+                <h4>أمثلة على REVOKE</h4>
+                <div class="code-block">
+<span class="comment">-- سحب صلاحية UPDATE من المستخدم 'sara'</span>
+<span class="keyword">REVOKE</span> <span class="keyword">UPDATE</span>
+<span class="keyword">ON</span> student
+<span class="keyword">FROM</span> sara;
+
+<span class="comment">-- سحب جميع الصلاحيات من المستخدم 'ahmed'</span>
+<span class="keyword">REVOKE</span> <span class="keyword">ALL PRIVILEGES</span>
+<span class="keyword">ON</span> student
+<span class="keyword">FROM</span> ahmed;
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <h4>GRANT مقابل REVOKE</h4>
+                <p>فكر في GRANT و REVOKE كعكس بعضهما:</p>
+                <ul>
+                    <li><strong>GRANT ... TO user</strong> — يمنح الصلاحيات</li>
+                    <li><strong>REVOKE ... FROM user</strong> — يسحب الصلاحيات</li>
+                </ul>
+                <p>لاحظ: GRANT يستخدم <strong>TO</strong>، بينما REVOKE يستخدم <strong>FROM</strong>.</p>
+            </div>
+        </section>
+
+        <!-- Section 10: SQL Categories Summary -->
+        <section id="sql-categories" class="content-section">
+            <h2>10. ملخص فئات لغة SQL</h2>
+
+            <p>أوامر SQL منظمة في ثلاث فئات رئيسية. إليك نظرة عامة شاملة على ما تعلمناه:</p>
+
+            <div class="concept-cards">
+                <div class="concept-card">
+                    <div class="icon">🏗️</div>
+                    <h4>DDL — لغة تعريف البيانات</h4>
+                    <p>تحدد هيكل قاعدة البيانات: <code>CREATE</code>، <code>ALTER</code>، <code>DROP</code>، <code>RENAME</code></p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">📊</div>
+                    <h4>DML — لغة معالجة البيانات</h4>
+                    <p>تعمل مع البيانات: <code>INSERT</code>، <code>SELECT</code>، <code>UPDATE</code>، <code>DELETE</code></p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">🔐</div>
+                    <h4>DCL — لغة التحكم في البيانات</h4>
+                    <p>تتحكم في الوصول: <code>GRANT</code>، <code>REVOKE</code></p>
+                </div>
+            </div>
+
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الفئة</th>
+                            <th>الغرض</th>
+                            <th>الأوامر</th>
+                            <th>غُطيت في</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>DDL</strong></td>
+                            <td>تعريف/تعديل هيكل قاعدة البيانات</td>
+                            <td>CREATE، ALTER، DROP، RENAME</td>
+                            <td>المحاضرة 2</td>
+                        </tr>
+                        <tr>
+                            <td><strong>DML</strong></td>
+                            <td>معالجة البيانات في الجداول</td>
+                            <td>INSERT، SELECT، UPDATE، DELETE</td>
+                            <td>المحاضرتان 3 و 4</td>
+                        </tr>
+                        <tr>
+                            <td><strong>DCL</strong></td>
+                            <td>التحكم في صلاحيات الوصول</td>
+                            <td>GRANT، REVOKE</td>
+                            <td>المحاضرة 4</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Exercises -->
+        <section id="exercises" class="content-section">
+            <h2>تمارين</h2>
+
+            <div class="review-questions">
+                <h3>اكتب عبارات SQL للمهام التالية</h3>
+                <p>باستخدام جدول Student (S_id, s_name, age, sex):</p>
+                <ol>
+                    <li>احذف الطالبة التي اسمها 'Haya Aldoussari'</li>
+                    <li>احذف جميع الطالبات اللواتي عمرهن أكبر من 21</li>
+                    <li>حدّث عمر جميع الطالبات إلى 20</li>
+                    <li>حدّث اسم الطالبة ذات الرقم '4439601234' إلى 'Maha'</li>
+                    <li>حدّث الاسم والعمر للطالبات بعمر 22 (عيّن الاسم إلى 'Reem' والعمر إلى 23)</li>
+                    <li>امنح صلاحيتي SELECT و INSERT على جدول Student لمستخدم اسمه 'teacher'</li>
+                    <li>اسحب صلاحية INSERT على جدول Student من المستخدم 'teacher'</li>
+                    <li>اكتب عبارة DELETE لإزالة جميع الصفوف من جدول Student</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Review Questions -->
+        <section id="review" class="content-section">
+            <h2>أسئلة المراجعة</h2>
+
+            <div class="review-questions">
+                <h3>اختبر فهمك</h3>
+                <ol>
+                    <li>ماذا يحدث إذا نفذت عبارة DELETE بدون جملة WHERE؟</li>
+                    <li>ما الفرق بين <code>DELETE FROM table</code> و <code>DROP TABLE table</code>؟</li>
+                    <li>ما الفرق بين UPDATE بدون WHERE و UPDATE مع WHERE؟</li>
+                    <li>كيف يمكنك تحديث أعمدة متعددة في عبارة UPDATE واحدة؟</li>
+                    <li>ما معنى DCL، وما هما أمراها الرئيسيان؟</li>
+                    <li>ما الفرق بين GRANT و REVOKE؟ أيهما يستخدم TO وأيهما يستخدم FROM؟</li>
+                    <li>سمِّ الفئات الرئيسية الثلاث لـ SQL واذكر الأوامر في كل فئة.</li>
+                    <li>لماذا مبدأ الحد الأدنى من الصلاحيات مهم في أمان قواعد البيانات؟</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>الملخص والنقاط الرئيسية</h2>
+
+            <h3>ما تعلمناه</h3>
+            <ol>
+                <li><strong>DELETE:</strong> يزيل الصفوف من الجدول باستخدام شرط WHERE. بدون WHERE، يتم حذف جميع الصفوف لكن هيكل الجدول يبقى.</li>
+
+                <li><strong>DELETE مقابل DROP:</strong> DELETE يزيل صفوف البيانات فقط؛ DROP يزيل الجدول بالكامل بما في ذلك هيكله.</li>
+
+                <li><strong>UPDATE (جميع الصفوف):</strong> بدون WHERE، يغير UPDATE كل صف في الجدول. استخدم بحذر.</li>
+
+                <li><strong>UPDATE (صفوف محددة):</strong> مع WHERE، يتم تعديل الصفوف المطابقة للشرط فقط. يمكنك تحديث أعمدة متعددة في عبارة واحدة.</li>
+
+                <li><strong>DCL (لغة التحكم في البيانات):</strong> GRANT يمنح الصلاحيات؛ REVOKE يسحبها. ضرورية لأمان قاعدة البيانات.</li>
+
+                <li><strong>فئات SQL:</strong> DDL تعرف الهيكل، DML تعالج البيانات، DCL تتحكم في صلاحيات الوصول.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>نظرة مستقبلية:</strong> في المحاضرة القادمة، سنستكشف استعلامات SQL بمزيد من العمق — نتعلم الترتيب باستخدام ORDER BY، وعمليات النصوص باستخدام LIKE، والكلمة المفتاحية DISTINCT لإزالة النتائج المكررة.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="credits">
+            <h2>المصادر</h2>
+            <p>مقرر برمجة قواعد البيانات - COMP 2413</p>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index.html">&rarr; العودة للصفحة الرئيسية</a>
+        </p>
+    </footer>
+</body>
+</html>

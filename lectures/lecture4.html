@@ -1,0 +1,827 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture 4: SQL DELETE, UPDATE & Data Control Language</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="lecture4_ar.html" class="lang-button" title="Switch to Arabic">العربية</a>
+    </div>
+
+    <header>
+        <h1>SQL DELETE, UPDATE & Data Control Language</h1>
+        <p class="subtitle">Lecture 4: Modifying Data and Controlling Database Access</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>Contents</h2>
+        <ul>
+            <li><a href="#objectives">Learning Objectives</a></li>
+            <li><a href="#recap">1. Quick Recap: DML Commands</a></li>
+            <li><a href="#delete">2. DELETE Statement</a></li>
+            <li><a href="#delete-examples">3. DELETE Examples</a></li>
+            <li><a href="#update-all">4. UPDATE — All Rows</a></li>
+            <li><a href="#update-specific">5. UPDATE — Specific Rows</a></li>
+            <li><a href="#update-multiple">6. UPDATE — Multiple Columns</a></li>
+            <li><a href="#dcl">7. Data Control Language (DCL)</a></li>
+            <li><a href="#grant">8. GRANT Command</a></li>
+            <li><a href="#revoke">9. REVOKE Command</a></li>
+            <li><a href="#sql-categories">10. SQL Language Categories Summary</a></li>
+            <li><a href="#exercises">Practice Exercises</a></li>
+            <li><a href="#review">Review Questions</a></li>
+            <li><a href="#summary">Summary</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <p>By the end of this lecture, you will be able to:</p>
+            <ul>
+                <li>Delete records from tables using the DELETE statement with conditions</li>
+                <li>Understand the danger of DELETE without a WHERE clause</li>
+                <li>Update all rows in a table using UPDATE with SET</li>
+                <li>Update specific rows using UPDATE with SET and WHERE</li>
+                <li>Update multiple columns in a single UPDATE statement</li>
+                <li>Understand Data Control Language (DCL) and its purpose</li>
+                <li>Grant permissions to users using the GRANT command</li>
+                <li>Revoke permissions from users using the REVOKE command</li>
+                <li>Distinguish between DML, DDL, and DCL categories of SQL</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: Quick Recap -->
+        <section id="recap" class="content-section">
+            <h2>1. Quick Recap: DML Commands</h2>
+
+            <div class="tip-box">
+                <h4>From Lecture 3</h4>
+                <p>In Lecture 3, we learned about <strong>INSERT INTO</strong> for adding data and <strong>SELECT</strong> for retrieving data (with and without WHERE conditions). In this lecture, we continue with the remaining DML commands and introduce DCL.</p>
+            </div>
+
+            <h3>DML Commands Overview</h3>
+            <div class="concept-cards">
+                <div class="concept-card">
+                    <div class="icon">➕</div>
+                    <h4>INSERT</h4>
+                    <p>Add new rows (Lecture 3)</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">🔍</div>
+                    <h4>SELECT</h4>
+                    <p>Retrieve data (Lecture 3)</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">🗑️</div>
+                    <h4>DELETE</h4>
+                    <p>Remove rows (This Lecture)</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">✏️</div>
+                    <h4>UPDATE</h4>
+                    <p>Modify data (This Lecture)</p>
+                </div>
+            </div>
+
+            <h3>Our Working Table: Student</h3>
+            <p>We will continue using the Student table with the following data:</p>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S_id</th>
+                            <th>s_name</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>4439601234</td>
+                            <td>Sarah Altalab</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601235</td>
+                            <td>Haya Aldoussari</td>
+                            <td>22</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601236</td>
+                            <td>Wafa Alothman</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Section 2: DELETE Statement -->
+        <section id="delete" class="content-section">
+            <h2>2. DELETE Statement</h2>
+
+            <div class="definition">
+                <h4>Definition: DELETE</h4>
+                <p>The <strong>DELETE</strong> statement removes one or more rows from a table. When combined with a <strong>WHERE</strong> clause, only the rows that match the condition are deleted.</p>
+            </div>
+
+            <h3>Syntax</h3>
+            <div class="code-block">
+<span class="keyword">DELETE FROM</span> table_name
+<span class="keyword">WHERE</span> condition;
+            </div>
+
+            <div class="warning-box">
+                <h4>Important Rules</h4>
+                <ul>
+                    <li>The WHERE clause specifies <strong>which rows</strong> to delete</li>
+                    <li>Without a WHERE clause, <strong>ALL rows</strong> in the table are deleted</li>
+                    <li>DELETE removes entire rows, not individual column values</li>
+                    <li>The table structure remains intact after DELETE</li>
+                    <li>Always double-check your WHERE condition before executing</li>
+                </ul>
+            </div>
+        </section>
+
+        <!-- Section 3: DELETE Examples -->
+        <section id="delete-examples" class="content-section">
+            <h2>3. DELETE Examples</h2>
+
+            <div class="example">
+                <h4>Example 1: Delete a Student by Name</h4>
+                <p>Write the SQL command to delete the student named "Wafa Alothman":</p>
+                <div class="code-block">
+<span class="comment">-- Delete the student named 'Wafa Alothman'</span>
+<span class="keyword">DELETE FROM</span> student
+<span class="keyword">WHERE</span> s_name = <span class="string">'Wafa Alothman'</span>;
+                </div>
+            </div>
+
+            <h3>Table Before DELETE</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S_id</th>
+                            <th>s_name</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>4439601234</td>
+                            <td>Sarah Altalab</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601235</td>
+                            <td>Haya Aldoussari</td>
+                            <td>22</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601236</td>
+                            <td>Wafa Alothman</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Table After DELETE</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S_id</th>
+                            <th>s_name</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>4439601234</td>
+                            <td>Sarah Altalab</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601235</td>
+                            <td>Haya Aldoussari</td>
+                            <td>22</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="example">
+                <h4>Example 2: Delete by Condition</h4>
+                <p>Delete all students whose age is 21:</p>
+                <div class="code-block">
+<span class="comment">-- Delete all students aged 21</span>
+<span class="keyword">DELETE FROM</span> student
+<span class="keyword">WHERE</span> age = <span class="number">21</span>;
+                </div>
+            </div>
+
+            <div class="warning-box">
+                <h4>Caution: DELETE Without WHERE</h4>
+                <p>If you omit the WHERE clause, <strong>all rows</strong> in the table will be deleted!</p>
+                <div class="code-block">
+<span class="comment">-- DANGER: This deletes ALL rows from the table!</span>
+<span class="keyword">DELETE FROM</span> student;
+                </div>
+                <p>The table still exists (its structure is preserved), but it will be completely empty. This is different from <code>DROP TABLE</code>, which removes the table entirely.</p>
+            </div>
+
+            <div class="key-message">
+                <h4>DELETE vs DROP</h4>
+                <p><strong>DELETE FROM table_name</strong> removes all data rows but keeps the table structure. <strong>DROP TABLE table_name</strong> removes the entire table (structure + data). Use DELETE when you want to clear data; use DROP when you want to remove the table completely.</p>
+            </div>
+        </section>
+
+        <!-- Section 4: UPDATE All Rows -->
+        <section id="update-all" class="content-section">
+            <h2>4. UPDATE — All Rows</h2>
+
+            <div class="definition">
+                <h4>Definition: UPDATE</h4>
+                <p>The <strong>UPDATE</strong> statement modifies existing data in a table. It uses the <strong>SET</strong> clause to specify which columns to change and what their new values should be.</p>
+            </div>
+
+            <h3>Form 1: Update All Rows (No WHERE)</h3>
+            <div class="code-block">
+<span class="keyword">UPDATE</span> table_name
+<span class="keyword">SET</span> column1 = value1, column2 = value2;
+            </div>
+
+            <div class="example">
+                <h4>Example: Set All Names to 'Fatima'</h4>
+                <div class="code-block">
+<span class="comment">-- Update ALL student names to 'Fatima'</span>
+<span class="keyword">UPDATE</span> student
+<span class="keyword">SET</span> s_name = <span class="string">'Fatima'</span>;
+                </div>
+            </div>
+
+            <h3>Table Before UPDATE</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S_id</th>
+                            <th>s_name</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>4439601234</td>
+                            <td>Sarah Altalab</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601235</td>
+                            <td>Haya Aldoussari</td>
+                            <td>22</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601236</td>
+                            <td>Wafa Alothman</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Table After UPDATE (All Rows)</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S_id</th>
+                            <th>s_name</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>4439601234</td>
+                            <td><strong>Fatima</strong></td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601235</td>
+                            <td><strong>Fatima</strong></td>
+                            <td>22</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601236</td>
+                            <td><strong>Fatima</strong></td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="warning-box">
+                <h4>Be Careful!</h4>
+                <p>Without a WHERE clause, <strong>every row</strong> in the table is updated. This is usually not the intended behavior. Always verify that you want to change all rows before omitting WHERE.</p>
+            </div>
+        </section>
+
+        <!-- Section 5: UPDATE Specific Rows -->
+        <section id="update-specific" class="content-section">
+            <h2>5. UPDATE — Specific Rows</h2>
+
+            <h3>Form 2: Update Specific Rows (With WHERE)</h3>
+            <div class="code-block">
+<span class="keyword">UPDATE</span> table_name
+<span class="keyword">SET</span> column1 = value1, column2 = value2
+<span class="keyword">WHERE</span> condition;
+            </div>
+
+            <div class="example">
+                <h4>Example: Update Name Where Age = 21</h4>
+                <div class="code-block">
+<span class="comment">-- Update name to 'Fatima' only for students aged 21</span>
+<span class="keyword">UPDATE</span> student
+<span class="keyword">SET</span> s_name = <span class="string">'Fatima'</span>
+<span class="keyword">WHERE</span> age = <span class="number">21</span>;
+                </div>
+            </div>
+
+            <h3>Table Before UPDATE</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S_id</th>
+                            <th>s_name</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>4439601234</td>
+                            <td>Sarah Altalab</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601235</td>
+                            <td>Haya Aldoussari</td>
+                            <td>22</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601236</td>
+                            <td>Wafa Alothman</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Table After UPDATE (Specific Rows)</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S_id</th>
+                            <th>s_name</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>4439601234</td>
+                            <td><strong>Fatima</strong></td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601235</td>
+                            <td>Haya Aldoussari</td>
+                            <td>22</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601236</td>
+                            <td><strong>Fatima</strong></td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="key-message">
+                <h4>UPDATE vs DELETE</h4>
+                <p><strong>UPDATE</strong> changes data but keeps the rows. <strong>DELETE</strong> removes entire rows. Both use WHERE to target specific rows — and both affect ALL rows when WHERE is omitted.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: UPDATE Multiple Columns -->
+        <section id="update-multiple" class="content-section">
+            <h2>6. UPDATE — Multiple Columns</h2>
+
+            <p>You can update more than one column in a single UPDATE statement by separating column assignments with commas.</p>
+
+            <h3>Syntax</h3>
+            <div class="code-block">
+<span class="keyword">UPDATE</span> table_name
+<span class="keyword">SET</span> column1 = value1, column2 = value2
+<span class="keyword">WHERE</span> condition;
+            </div>
+
+            <div class="example">
+                <h4>Example: Update Name and Age</h4>
+                <div class="code-block">
+<span class="comment">-- Update name to 'Nora' and age to 23 for student with S_id '4439601235'</span>
+<span class="keyword">UPDATE</span> student
+<span class="keyword">SET</span> s_name = <span class="string">'Nora'</span>, age = <span class="number">23</span>
+<span class="keyword">WHERE</span> S_id = <span class="string">'4439601235'</span>;
+                </div>
+            </div>
+
+            <h3>Table After UPDATE (Multiple Columns)</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>S_id</th>
+                            <th>s_name</th>
+                            <th>age</th>
+                            <th>sex</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>4439601234</td>
+                            <td>Sarah Altalab</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601235</td>
+                            <td><strong>Nora</strong></td>
+                            <td><strong>23</strong></td>
+                            <td>F</td>
+                        </tr>
+                        <tr>
+                            <td>4439601236</td>
+                            <td>Wafa Alothman</td>
+                            <td>21</td>
+                            <td>F</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tip-box">
+                <h4>DML Commands Reference</h4>
+                <div class="table-demo">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Command</th>
+                                <th>Purpose</th>
+                                <th>Syntax</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><strong>INSERT</strong></td>
+                                <td>Add new rows to a table</td>
+                                <td><code>INSERT INTO table VALUES (...);</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>SELECT</strong></td>
+                                <td>Retrieve data from tables</td>
+                                <td><code>SELECT columns FROM table WHERE ...;</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>UPDATE</strong></td>
+                                <td>Modify existing data</td>
+                                <td><code>UPDATE table SET col=val WHERE ...;</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>DELETE</strong></td>
+                                <td>Remove rows from a table</td>
+                                <td><code>DELETE FROM table WHERE ...;</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>LOCK</strong></td>
+                                <td>Table control concurrency</td>
+                                <td><code>LOCK TABLE table IN lock_mode;</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>CALL</strong></td>
+                                <td>Call a PL/SQL or Java subprogram</td>
+                                <td><code>CALL procedure_name(arguments);</code></td>
+                            </tr>
+                            <tr>
+                                <td><strong>EXPLAIN PLAN</strong></td>
+                                <td>Describe the access path to data</td>
+                                <td><code>EXPLAIN PLAN FOR SELECT * FROM table;</code></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7: DCL -->
+        <section id="dcl" class="content-section">
+            <h2>7. Data Control Language (DCL)</h2>
+
+            <div class="definition">
+                <h4>Definition: DCL</h4>
+                <p><strong>Data Control Language (DCL)</strong> includes commands such as GRANT and REVOKE which mainly deal with the rights, permissions, and other controls of the database system. These commands are used to control access to data in the database by granting or revoking permissions.</p>
+            </div>
+
+            <div class="concept-cards">
+                <div class="concept-card">
+                    <div class="icon">✅</div>
+                    <h4>GRANT</h4>
+                    <p>Gives specific privileges to users, allowing them to perform certain operations on database objects</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">🚫</div>
+                    <h4>REVOKE</h4>
+                    <p>Removes previously granted privileges from users, restricting their access to database objects</p>
+                </div>
+            </div>
+
+            <div class="key-message">
+                <h4>Why DCL Matters</h4>
+                <p>In real-world databases, not every user should have full access. DCL allows database administrators to enforce the <strong>principle of least privilege</strong> — users get only the permissions they need to do their job. This is essential for database security.</p>
+            </div>
+        </section>
+
+        <!-- Section 8: GRANT -->
+        <section id="grant" class="content-section">
+            <h2>8. GRANT Command</h2>
+
+            <p>The GRANT command gives specific permissions to users or roles on database objects.</p>
+
+            <h3>Syntax</h3>
+            <div class="code-block">
+<span class="keyword">GRANT</span> permission1, permission2, ...
+<span class="keyword">ON</span> object
+<span class="keyword">TO</span> user;
+            </div>
+
+            <h3>Common Permissions</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Permission</th>
+                            <th>Description</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>SELECT</code></td>
+                            <td>Permission to read/query data from a table</td>
+                        </tr>
+                        <tr>
+                            <td><code>INSERT</code></td>
+                            <td>Permission to add new rows to a table</td>
+                        </tr>
+                        <tr>
+                            <td><code>UPDATE</code></td>
+                            <td>Permission to modify existing data in a table</td>
+                        </tr>
+                        <tr>
+                            <td><code>DELETE</code></td>
+                            <td>Permission to remove rows from a table</td>
+                        </tr>
+                        <tr>
+                            <td><code>ALL PRIVILEGES</code></td>
+                            <td>All available permissions on the object</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="example">
+                <h4>GRANT Examples</h4>
+                <div class="code-block">
+<span class="comment">-- Grant SELECT permission on Student table to user 'ahmed'</span>
+<span class="keyword">GRANT</span> <span class="keyword">SELECT</span>
+<span class="keyword">ON</span> student
+<span class="keyword">TO</span> ahmed;
+
+<span class="comment">-- Grant INSERT and UPDATE permissions to user 'sara'</span>
+<span class="keyword">GRANT</span> <span class="keyword">INSERT</span>, <span class="keyword">UPDATE</span>
+<span class="keyword">ON</span> student
+<span class="keyword">TO</span> sara;
+
+<span class="comment">-- Grant all permissions on Student table to user 'admin'</span>
+<span class="keyword">GRANT</span> <span class="keyword">ALL PRIVILEGES</span>
+<span class="keyword">ON</span> student
+<span class="keyword">TO</span> admin;
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 9: REVOKE -->
+        <section id="revoke" class="content-section">
+            <h2>9. REVOKE Command</h2>
+
+            <p>The REVOKE command removes previously granted permissions from users or roles.</p>
+
+            <h3>Syntax</h3>
+            <div class="code-block">
+<span class="keyword">REVOKE</span> permission1, permission2, ...
+<span class="keyword">ON</span> object
+<span class="keyword">FROM</span> user;
+            </div>
+
+            <div class="example">
+                <h4>REVOKE Examples</h4>
+                <div class="code-block">
+<span class="comment">-- Revoke UPDATE permission from user 'sara'</span>
+<span class="keyword">REVOKE</span> <span class="keyword">UPDATE</span>
+<span class="keyword">ON</span> student
+<span class="keyword">FROM</span> sara;
+
+<span class="comment">-- Revoke all permissions from user 'ahmed'</span>
+<span class="keyword">REVOKE</span> <span class="keyword">ALL PRIVILEGES</span>
+<span class="keyword">ON</span> student
+<span class="keyword">FROM</span> ahmed;
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <h4>GRANT vs REVOKE</h4>
+                <p>Think of GRANT and REVOKE as opposites:</p>
+                <ul>
+                    <li><strong>GRANT ... TO user</strong> — gives permissions</li>
+                    <li><strong>REVOKE ... FROM user</strong> — takes away permissions</li>
+                </ul>
+                <p>Notice: GRANT uses <strong>TO</strong>, while REVOKE uses <strong>FROM</strong>.</p>
+            </div>
+        </section>
+
+        <!-- Section 10: SQL Categories Summary -->
+        <section id="sql-categories" class="content-section">
+            <h2>10. SQL Language Categories Summary</h2>
+
+            <p>SQL commands are organized into three main categories. Here is a complete overview of what we have covered:</p>
+
+            <div class="concept-cards">
+                <div class="concept-card">
+                    <div class="icon">🏗️</div>
+                    <h4>DDL — Data Definition Language</h4>
+                    <p>Defines database structure: <code>CREATE</code>, <code>ALTER</code>, <code>DROP</code>, <code>RENAME</code></p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">📊</div>
+                    <h4>DML — Data Manipulation Language</h4>
+                    <p>Works with data: <code>INSERT</code>, <code>SELECT</code>, <code>UPDATE</code>, <code>DELETE</code></p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">🔐</div>
+                    <h4>DCL — Data Control Language</h4>
+                    <p>Controls access: <code>GRANT</code>, <code>REVOKE</code></p>
+                </div>
+            </div>
+
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Category</th>
+                            <th>Purpose</th>
+                            <th>Commands</th>
+                            <th>Covered In</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>DDL</strong></td>
+                            <td>Define/modify database structure</td>
+                            <td>CREATE, ALTER, DROP, RENAME</td>
+                            <td>Lecture 2</td>
+                        </tr>
+                        <tr>
+                            <td><strong>DML</strong></td>
+                            <td>Manipulate data in tables</td>
+                            <td>INSERT, SELECT, UPDATE, DELETE</td>
+                            <td>Lectures 3 &amp; 4</td>
+                        </tr>
+                        <tr>
+                            <td><strong>DCL</strong></td>
+                            <td>Control access permissions</td>
+                            <td>GRANT, REVOKE</td>
+                            <td>Lecture 4</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Exercises -->
+        <section id="exercises" class="content-section">
+            <h2>Practice Exercises</h2>
+
+            <div class="review-questions">
+                <h3>Write SQL Statements For These Tasks</h3>
+                <p>Using the Student table (S_id, s_name, age, sex):</p>
+                <ol>
+                    <li>Delete the student whose name is 'Haya Aldoussari'</li>
+                    <li>Delete all students whose age is greater than 21</li>
+                    <li>Update the age of all students to 20</li>
+                    <li>Update the name of the student with S_id '4439601234' to 'Maha'</li>
+                    <li>Update both the name and age of students where age = 22 (set name to 'Reem', age to 23)</li>
+                    <li>Grant SELECT and INSERT permissions on the Student table to a user named 'teacher'</li>
+                    <li>Revoke INSERT permission on the Student table from user 'teacher'</li>
+                    <li>Write a DELETE statement that would remove ALL rows from the Student table</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Review Questions -->
+        <section id="review" class="content-section">
+            <h2>Review Questions</h2>
+
+            <div class="review-questions">
+                <h3>Test Your Understanding</h3>
+                <ol>
+                    <li>What happens if you execute a DELETE statement without a WHERE clause?</li>
+                    <li>What is the difference between <code>DELETE FROM table</code> and <code>DROP TABLE table</code>?</li>
+                    <li>What is the difference between UPDATE without WHERE and UPDATE with WHERE?</li>
+                    <li>How can you update multiple columns in a single UPDATE statement?</li>
+                    <li>What does DCL stand for, and what are its two main commands?</li>
+                    <li>What is the difference between GRANT and REVOKE? Which uses TO and which uses FROM?</li>
+                    <li>Name the three main categories of SQL and list the commands in each.</li>
+                    <li>Why is the principle of least privilege important in database security?</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>Summary and Key Takeaways</h2>
+
+            <h3>What We've Learned</h3>
+            <ol>
+                <li><strong>DELETE:</strong> Removes rows from a table using a WHERE condition. Without WHERE, all rows are deleted but the table structure remains.</li>
+
+                <li><strong>DELETE vs DROP:</strong> DELETE removes data rows only; DROP removes the entire table including its structure.</li>
+
+                <li><strong>UPDATE (All Rows):</strong> Without WHERE, UPDATE changes every row in the table. Use with caution.</li>
+
+                <li><strong>UPDATE (Specific Rows):</strong> With WHERE, only rows matching the condition are modified. You can update multiple columns in one statement.</li>
+
+                <li><strong>DCL (Data Control Language):</strong> GRANT gives permissions; REVOKE removes them. Essential for database security.</li>
+
+                <li><strong>SQL Categories:</strong> DDL defines structure, DML manipulates data, DCL controls access permissions.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>Looking Ahead:</strong> In the next lecture, we will explore SQL Queries in more depth — learning about sorting with ORDER BY, string operations with LIKE, and the DISTINCT keyword for eliminating duplicate results.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="credits">
+            <h2>Credits</h2>
+            <p>Database Programming Course - COMP 2413</p>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index.html">&larr; Back to Course Home</a>
+        </p>
+    </footer>
+</body>
+</html>
