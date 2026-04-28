@@ -1,0 +1,668 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lecture 8: Database Normalization</title>
+    <link rel="stylesheet" href="../css/styles.css">
+</head>
+<body>
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <a href="lecture8_ar.html" class="lang-button" title="Switch to Arabic">العربية</a>
+    </div>
+
+    <header>
+        <h1>Database Normalization</h1>
+        <p class="subtitle">Lecture 8: Designing Redundancy-Free Schemas with 1NF, 2NF, 3NF, and BCNF</p>
+    </header>
+
+    <nav class="table-of-contents no-print">
+        <h2>Contents</h2>
+        <ul>
+            <li><a href="#objectives">Learning Objectives</a></li>
+            <li><a href="#why-normalize">1. Why Normalize? Update Anomalies</a></li>
+            <li><a href="#fds">2. Functional Dependencies</a></li>
+            <li><a href="#keys">3. Keys Recap</a></li>
+            <li><a href="#1nf">4. First Normal Form (1NF)</a></li>
+            <li><a href="#2nf">5. Second Normal Form (2NF)</a></li>
+            <li><a href="#3nf">6. Third Normal Form (3NF)</a></li>
+            <li><a href="#bcnf">7. Boyce-Codd Normal Form (BCNF)</a></li>
+            <li><a href="#worked-example">8. Worked Example: Step-by-Step Decomposition</a></li>
+            <li><a href="#denormalization">9. A Note on Denormalization</a></li>
+            <li><a href="#exercises">Practice Exercises</a></li>
+            <li><a href="#review">Review Questions</a></li>
+            <li><a href="#summary">Summary</a></li>
+        </ul>
+    </nav>
+
+    <main>
+        <!-- Learning Objectives -->
+        <section id="objectives" class="learning-objectives">
+            <h2>Learning Objectives</h2>
+            <p>By the end of this lecture, you will be able to:</p>
+            <ul>
+                <li>Identify the three update anomalies (insert, update, delete) in a poorly designed table</li>
+                <li>Read and write functional dependencies using the <code>X &rarr; Y</code> notation</li>
+                <li>Distinguish super keys, candidate keys, primary keys, and prime / non-prime attributes</li>
+                <li>Decompose a table into First Normal Form (1NF) by removing repeating groups</li>
+                <li>Decompose a table into Second Normal Form (2NF) by removing partial dependencies</li>
+                <li>Decompose a table into Third Normal Form (3NF) by removing transitive dependencies</li>
+                <li>Recognize when BCNF is needed and how it differs from 3NF</li>
+                <li>Decide when controlled denormalization is justified</li>
+            </ul>
+        </section>
+
+        <!-- Section 1: Why Normalize -->
+        <section id="why-normalize" class="content-section">
+            <h2>1. Why Normalize? Update Anomalies</h2>
+
+            <div class="key-message">
+                <p><strong>The Problem:</strong> If a single table tries to store too many facts at once, every <em>insert</em>, <em>update</em>, and <em>delete</em> becomes risky. Normalization is the process of splitting tables so that each fact is stored in exactly one place.</p>
+            </div>
+
+            <p>Suppose a university used a single denormalized table to track which student takes which course and who teaches it:</p>
+
+            <h3>Denormalized <code>StudentCourse</code> Table</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sid</th>
+                            <th>Sname</th>
+                            <th>Cid</th>
+                            <th>Cname</th>
+                            <th>Pid</th>
+                            <th>Pname</th>
+                            <th>Mark</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>Mohamed Al Tamimi</td><td>C1</td><td>Programming 2</td><td>3</td><td>Dr. Ameera</td><td>35</td></tr>
+                        <tr><td>1</td><td>Mohamed Al Tamimi</td><td>C3</td><td>Programming 1</td><td>2</td><td>Dr. Fahd</td><td>22</td></tr>
+                        <tr><td>2</td><td>Sarra Al Askar</td><td>C2</td><td>Data Structure</td><td>1</td><td>Prof. Awartef</td><td>17</td></tr>
+                        <tr><td>2</td><td>Sarra Al Askar</td><td>C3</td><td>Programming 1</td><td>2</td><td>Dr. Fahd</td><td>35</td></tr>
+                        <tr><td>3</td><td>Munera Al Jomoa</td><td>C2</td><td>Data Structure</td><td>1</td><td>Prof. Awartef</td><td>32</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Three Anomalies This Causes</h3>
+
+            <div class="concept-cards">
+                <div class="concept-card">
+                    <div class="icon">➕</div>
+                    <h4>Insert Anomaly</h4>
+                    <p>You can't add a brand-new course (e.g., a course nobody has taken yet) without inventing fake student data, because <code>Sid</code> is part of the row.</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">✏️</div>
+                    <h4>Update Anomaly</h4>
+                    <p>If "Dr. Fahd" changes name, you must update <em>every</em> row that mentions him. Miss one row and the database becomes inconsistent.</p>
+                </div>
+                <div class="concept-card">
+                    <div class="icon">❌</div>
+                    <h4>Delete Anomaly</h4>
+                    <p>If the only student in course C1 drops it, deleting that row also wipes out the fact that course C1 exists and that Dr. Ameera teaches it.</p>
+                </div>
+            </div>
+
+            <div class="tip-box">
+                <h4>Key Insight</h4>
+                <p>All three anomalies have the same root cause: the table mixes <em>independent</em> facts (a student's name, a course's name, a professor's name, a mark) into one row. Normalization separates these facts into different tables.</p>
+            </div>
+        </section>
+
+        <!-- Section 2: Functional Dependencies -->
+        <section id="fds" class="content-section">
+            <h2>2. Functional Dependencies</h2>
+
+            <div class="definition">
+                <h3>What is a Functional Dependency?</h3>
+                <p>A <strong>functional dependency</strong> (FD) is a constraint between two sets of attributes in a relation. We write <code>X &rarr; Y</code> and read it as &ldquo;<em>X determines Y</em>&rdquo; or &ldquo;<em>Y is functionally dependent on X</em>&rdquo;.</p>
+                <p>It means: if two rows agree on the value of <code>X</code>, they must also agree on the value of <code>Y</code>.</p>
+            </div>
+
+            <h3>Examples in the University Database</h3>
+            <div class="example">
+                <ul>
+                    <li><code>Sid &rarr; Sname, Age, Sex</code> &mdash; the student ID determines the student's other attributes</li>
+                    <li><code>Cid &rarr; Cname, Pid</code> &mdash; the course ID determines the course name and which professor teaches it</li>
+                    <li><code>Pid &rarr; Pname, Grade</code> &mdash; the professor ID determines the professor's name and grade</li>
+                    <li><code>Sid, Cid &rarr; Mark</code> &mdash; the student/course pair determines the mark</li>
+                </ul>
+            </div>
+
+            <h3>Types of Functional Dependencies</h3>
+
+            <div class="concept-cards">
+                <div class="concept-card">
+                    <h4>Full Dependency</h4>
+                    <p><code>Y</code> depends on the <em>entire</em> key, not just part of it. Example: <code>{Sid, Cid} &rarr; Mark</code> &mdash; you need both to know the mark.</p>
+                </div>
+                <div class="concept-card">
+                    <h4>Partial Dependency</h4>
+                    <p><code>Y</code> depends on only <em>part</em> of a composite key. Example: in our table above, <code>{Sid, Cid} &rarr; Sname</code> is partial, because <code>Sid &rarr; Sname</code> already.</p>
+                </div>
+                <div class="concept-card">
+                    <h4>Transitive Dependency</h4>
+                    <p><code>X &rarr; Y</code> and <code>Y &rarr; Z</code>, where <code>Y</code> is not a key. Example: <code>Cid &rarr; Pid</code> and <code>Pid &rarr; Pname</code>, so <code>Cid &rarr; Pname</code> is transitive.</p>
+                </div>
+                <div class="concept-card">
+                    <h4>Trivial Dependency</h4>
+                    <p><code>Y</code> is a subset of <code>X</code>. Example: <code>{Sid, Cid} &rarr; Sid</code>. Trivially true; ignored when normalizing.</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Keys Recap -->
+        <section id="keys" class="content-section">
+            <h2>3. Keys Recap</h2>
+
+            <p>Normal forms are defined in terms of keys, so let's nail down the vocabulary:</p>
+
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Term</th>
+                            <th>Definition</th>
+                            <th>Example (StudentCourse table)</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Super key</td>
+                            <td>Any set of attributes that uniquely identifies a row</td>
+                            <td><code>{Sid, Cid}</code>, <code>{Sid, Cid, Mark}</code></td>
+                        </tr>
+                        <tr>
+                            <td>Candidate key</td>
+                            <td>A minimal super key &mdash; remove any attribute and it stops being unique</td>
+                            <td><code>{Sid, Cid}</code></td>
+                        </tr>
+                        <tr>
+                            <td>Primary key</td>
+                            <td>The candidate key chosen as the main row identifier</td>
+                            <td><code>{Sid, Cid}</code></td>
+                        </tr>
+                        <tr>
+                            <td>Prime attribute</td>
+                            <td>An attribute that is part of <em>some</em> candidate key</td>
+                            <td><code>Sid</code>, <code>Cid</code></td>
+                        </tr>
+                        <tr>
+                            <td>Non-prime attribute</td>
+                            <td>An attribute that is not part of any candidate key</td>
+                            <td><code>Sname</code>, <code>Cname</code>, <code>Pid</code>, <code>Pname</code>, <code>Mark</code></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="tip-box">
+                <h4>Why It Matters</h4>
+                <p>2NF cares about <em>partial</em> dependencies on the primary key. 3NF cares about transitive dependencies between <em>non-prime</em> attributes. So you have to know which attributes are prime before you can apply the rules.</p>
+            </div>
+        </section>
+
+        <!-- Section 4: 1NF -->
+        <section id="1nf" class="content-section">
+            <h2>4. First Normal Form (1NF)</h2>
+
+            <div class="definition">
+                <h3>Rule</h3>
+                <p>A relation is in <strong>First Normal Form</strong> if:</p>
+                <ol>
+                    <li>Each cell holds a single, <strong>atomic</strong> value &mdash; no lists, no comma-separated values.</li>
+                    <li>There are no <strong>repeating groups</strong> of columns (e.g., <code>Course1, Course2, Course3</code>).</li>
+                    <li>Each column has a unique name and each row is uniquely identified by a primary key.</li>
+                </ol>
+            </div>
+
+            <h3>Bad: Not in 1NF</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr><th>Sid</th><th>Sname</th><th>Courses</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>Mohamed Al Tamimi</td><td>C1, C3, C4</td></tr>
+                        <tr><td>2</td><td>Sarra Al Askar</td><td>C2, C3</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>The <code>Courses</code> column packs many values into one cell. You can't easily ask &ldquo;which students take C3?&rdquo; without parsing the string.</p>
+
+            <h3>Good: In 1NF</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr><th>Sid</th><th>Sname</th><th>Cid</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>Mohamed Al Tamimi</td><td>C1</td></tr>
+                        <tr><td>1</td><td>Mohamed Al Tamimi</td><td>C3</td></tr>
+                        <tr><td>1</td><td>Mohamed Al Tamimi</td><td>C4</td></tr>
+                        <tr><td>2</td><td>Sarra Al Askar</td><td>C2</td></tr>
+                        <tr><td>2</td><td>Sarra Al Askar</td><td>C3</td></tr>
+                    </tbody>
+                </table>
+            </div>
+            <p>Each cell now holds one value. The primary key becomes the composite <code>{Sid, Cid}</code>.</p>
+
+            <div class="key-message">
+                <p>1NF is the <strong>baseline</strong> &mdash; if your table isn't 1NF, you can't even talk about 2NF or 3NF. SQL itself essentially assumes 1NF.</p>
+            </div>
+        </section>
+
+        <!-- Section 5: 2NF -->
+        <section id="2nf" class="content-section">
+            <h2>5. Second Normal Form (2NF)</h2>
+
+            <div class="definition">
+                <h3>Rule</h3>
+                <p>A relation is in <strong>Second Normal Form</strong> if:</p>
+                <ol>
+                    <li>It is already in 1NF.</li>
+                    <li>Every <strong>non-prime</strong> attribute is <strong>fully</strong> functionally dependent on the primary key &mdash; i.e., there are no <em>partial</em> dependencies.</li>
+                </ol>
+                <p>2NF is only a concern when the primary key is <strong>composite</strong>. If the PK is a single column, partial dependencies cannot exist, so 1NF tables with single-column keys are automatically 2NF.</p>
+            </div>
+
+            <h3>Bad: Not in 2NF</h3>
+            <p>Take this 1NF table where the primary key is <code>{Sid, Cid}</code>:</p>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr><th>Sid</th><th>Cid</th><th>Sname</th><th>Cname</th><th>Mark</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>C1</td><td>Mohamed Al Tamimi</td><td>Programming 2</td><td>35</td></tr>
+                        <tr><td>1</td><td>C3</td><td>Mohamed Al Tamimi</td><td>Programming 1</td><td>22</td></tr>
+                        <tr><td>2</td><td>C2</td><td>Sarra Al Askar</td><td>Data Structure</td><td>17</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p>Functional dependencies:</p>
+            <ul>
+                <li><code>Sid &rarr; Sname</code> &nbsp;&mdash;&nbsp; <em>partial</em> (depends on only part of the key)</li>
+                <li><code>Cid &rarr; Cname</code> &nbsp;&mdash;&nbsp; <em>partial</em></li>
+                <li><code>{Sid, Cid} &rarr; Mark</code> &nbsp;&mdash;&nbsp; full</li>
+            </ul>
+
+            <h3>Good: Decomposed into 2NF</h3>
+            <p>Split into three tables, each with a key that fully determines the rest:</p>
+
+            <h4>Student</h4>
+            <div class="table-demo">
+                <table>
+                    <thead><tr><th>Sid (PK)</th><th>Sname</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>Mohamed Al Tamimi</td></tr>
+                        <tr><td>2</td><td>Sarra Al Askar</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>Course</h4>
+            <div class="table-demo">
+                <table>
+                    <thead><tr><th>Cid (PK)</th><th>Cname</th></tr></thead>
+                    <tbody>
+                        <tr><td>C1</td><td>Programming 2</td></tr>
+                        <tr><td>C2</td><td>Data Structure</td></tr>
+                        <tr><td>C3</td><td>Programming 1</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>Marks</h4>
+            <div class="table-demo">
+                <table>
+                    <thead><tr><th>Sid (PK, FK)</th><th>Cid (PK, FK)</th><th>Mark</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>C1</td><td>35</td></tr>
+                        <tr><td>1</td><td>C3</td><td>22</td></tr>
+                        <tr><td>2</td><td>C2</td><td>17</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="key-message">
+                <p>Each non-prime attribute is now stored in exactly the table whose key it actually depends on.</p>
+            </div>
+        </section>
+
+        <!-- Section 6: 3NF -->
+        <section id="3nf" class="content-section">
+            <h2>6. Third Normal Form (3NF)</h2>
+
+            <div class="definition">
+                <h3>Rule</h3>
+                <p>A relation is in <strong>Third Normal Form</strong> if:</p>
+                <ol>
+                    <li>It is already in 2NF.</li>
+                    <li>No non-prime attribute is <strong>transitively</strong> dependent on the primary key.</li>
+                </ol>
+                <p>Plain English: every non-prime attribute must depend on <em>the key, the whole key, and nothing but the key</em>. (A famous mnemonic attributed to a database designer named Bill Kent.)</p>
+            </div>
+
+            <h3>Bad: Not in 3NF</h3>
+            <p>Take this 2NF table for the Course catalog, where each course also stores its professor's name:</p>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr><th>Cid (PK)</th><th>Cname</th><th>Pid</th><th>Pname</th><th>Grade</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>C1</td><td>Programming 2</td><td>3</td><td>Dr. Ameera</td><td>Assistant Professor</td></tr>
+                        <tr><td>C2</td><td>Data Structure</td><td>1</td><td>Prof. Awartef</td><td>Professor</td></tr>
+                        <tr><td>C3</td><td>Programming 1</td><td>2</td><td>Dr. Fahd</td><td>Assistant Professor</td></tr>
+                        <tr><td>C4</td><td>Statistic</td><td>3</td><td>Dr. Ameera</td><td>Assistant Professor</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p>Functional dependencies:</p>
+            <ul>
+                <li><code>Cid &rarr; Cname, Pid</code> &nbsp;&mdash;&nbsp; full</li>
+                <li><code>Pid &rarr; Pname, Grade</code> &nbsp;&mdash;&nbsp; non-prime determines non-prime &nbsp;&rarr;&nbsp; <em>transitive</em></li>
+            </ul>
+
+            <p>So <code>Cid &rarr; Pname</code> only because <code>Cid &rarr; Pid</code> and <code>Pid &rarr; Pname</code>. That's a transitive dependency &mdash; if Dr. Ameera changes name, <em>two</em> rows must be updated, and they could fall out of sync.</p>
+
+            <h3>Good: Decomposed into 3NF</h3>
+
+            <h4>Course</h4>
+            <div class="table-demo">
+                <table>
+                    <thead><tr><th>Cid (PK)</th><th>Cname</th><th>Pid (FK)</th></tr></thead>
+                    <tbody>
+                        <tr><td>C1</td><td>Programming 2</td><td>3</td></tr>
+                        <tr><td>C2</td><td>Data Structure</td><td>1</td></tr>
+                        <tr><td>C3</td><td>Programming 1</td><td>2</td></tr>
+                        <tr><td>C4</td><td>Statistic</td><td>3</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h4>Professor</h4>
+            <div class="table-demo">
+                <table>
+                    <thead><tr><th>Pid (PK)</th><th>Pname</th><th>Grade</th></tr></thead>
+                    <tbody>
+                        <tr><td>1</td><td>Prof. Awartef</td><td>Professor</td></tr>
+                        <tr><td>2</td><td>Dr. Fahd</td><td>Assistant Professor</td></tr>
+                        <tr><td>3</td><td>Dr. Ameera</td><td>Assistant Professor</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <p>Each professor's name now lives in exactly one row. To get a course's professor name, you join: <code>Course &bowtie; Professor ON Course.Pid = Professor.Pid</code>.</p>
+
+            <div class="tip-box">
+                <h4>Rule of Thumb</h4>
+                <p>If a non-key column &ldquo;describes&rdquo; another non-key column, it probably belongs in its own table.</p>
+            </div>
+        </section>
+
+        <!-- Section 7: BCNF -->
+        <section id="bcnf" class="content-section">
+            <h2>7. Boyce-Codd Normal Form (BCNF)</h2>
+
+            <div class="definition">
+                <h3>Rule</h3>
+                <p>A relation is in <strong>BCNF</strong> if for every non-trivial functional dependency <code>X &rarr; Y</code>, the determinant <code>X</code> is a <strong>super key</strong>.</p>
+                <p>In other words: the only allowed determinants are super keys. BCNF is a slightly stricter version of 3NF.</p>
+            </div>
+
+            <p>Most tables that satisfy 3NF also satisfy BCNF. The two only differ in tables with <em>overlapping candidate keys</em>, which are uncommon in everyday designs.</p>
+
+            <div class="example">
+                <h4>When 3NF Is Not BCNF</h4>
+                <p>Imagine a table <code>StudentAdvisor(Sid, Major, AdvisorId)</code> with rules:</p>
+                <ul>
+                    <li>Each student has one major and one advisor: <code>{Sid, Major} &rarr; AdvisorId</code></li>
+                    <li>Each advisor advises one major only: <code>AdvisorId &rarr; Major</code></li>
+                </ul>
+                <p>This is in 3NF (every non-prime attribute depends only on a candidate key), but <code>AdvisorId</code> is not a super key &mdash; yet <code>AdvisorId &rarr; Major</code>. So it's <em>not</em> BCNF.</p>
+                <p>Decomposition: <code>StudentAdvisor(Sid, AdvisorId)</code> + <code>Advisor(AdvisorId, Major)</code>.</p>
+            </div>
+
+            <div class="key-message">
+                <p>For most coursework and most real-world schemas, reaching <strong>3NF is the practical goal</strong>. BCNF is a useful refinement when 3NF still leaves anomalies in tables with multiple overlapping candidate keys.</p>
+            </div>
+        </section>
+
+        <!-- Section 8: Worked Example -->
+        <section id="worked-example" class="content-section">
+            <h2>8. Worked Example: Step-by-Step Decomposition</h2>
+
+            <p>Let's normalize the original denormalized table from Section 1, end to end.</p>
+
+            <h3>Starting Point: Single Bloated Table</h3>
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Sid</th><th>Sname</th><th>Cid</th><th>Cname</th><th>Pid</th><th>Pname</th><th>Mark</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>1</td><td>Mohamed Al Tamimi</td><td>C1</td><td>Programming 2</td><td>3</td><td>Dr. Ameera</td><td>35</td></tr>
+                        <tr><td>1</td><td>Mohamed Al Tamimi</td><td>C3</td><td>Programming 1</td><td>2</td><td>Dr. Fahd</td><td>22</td></tr>
+                        <tr><td>2</td><td>Sarra Al Askar</td><td>C2</td><td>Data Structure</td><td>1</td><td>Prof. Awartef</td><td>17</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Step 1 &mdash; Reach 1NF</h3>
+            <p>Each cell already holds one value. The composite primary key is <code>{Sid, Cid}</code>. <strong>Already in 1NF.</strong></p>
+
+            <h3>Step 2 &mdash; Reach 2NF</h3>
+            <p>Identify partial dependencies on <code>{Sid, Cid}</code>:</p>
+            <ul>
+                <li><code>Sid &rarr; Sname</code> &mdash; partial &rarr; move to <code>Student</code></li>
+                <li><code>Cid &rarr; Cname, Pid, Pname</code> &mdash; partial &rarr; move to <code>Course</code></li>
+                <li><code>{Sid, Cid} &rarr; Mark</code> &mdash; full &rarr; stays in <code>Marks</code></li>
+            </ul>
+
+            <h4>Tables after 2NF</h4>
+            <p><code>Student(Sid, Sname)</code></p>
+            <p><code>Course(Cid, Cname, Pid, Pname)</code></p>
+            <p><code>Marks(Sid, Cid, Mark)</code></p>
+
+            <h3>Step 3 &mdash; Reach 3NF</h3>
+            <p>Check the <code>Course</code> table. <code>Pid</code> is non-prime and <code>Pid &rarr; Pname</code> &mdash; transitive. Pull professor info into its own table:</p>
+
+            <h4>Final 3NF Schema</h4>
+            <ul>
+                <li><code>Student(<u>Sid</u>, Sname)</code></li>
+                <li><code>Professor(<u>Pid</u>, Pname)</code></li>
+                <li><code>Course(<u>Cid</u>, Cname, Pid<sup>&rarr;FK</sup>)</code></li>
+                <li><code>Marks(<u>Sid</u>, <u>Cid</u>, Mark)</code> &mdash; <code>Sid</code>, <code>Cid</code> are also FKs</li>
+            </ul>
+
+            <div class="tip-box">
+                <h4>Sanity Check</h4>
+                <p>This is exactly the schema used in Lectures 5 &amp; 6+7. Those queries worked precisely because the schema was already in 3NF &mdash; no redundancy, clean joins.</p>
+            </div>
+        </section>
+
+        <!-- Section 9: Denormalization -->
+        <section id="denormalization" class="content-section">
+            <h2>9. A Note on Denormalization</h2>
+
+            <p>Normalization improves <em>integrity</em>, but it splits data across many tables &mdash; meaning more joins at query time. For some read-heavy systems (analytics dashboards, reports), the cost of joining many tables on every query becomes a real performance concern.</p>
+
+            <p><strong>Denormalization</strong> is the deliberate, controlled act of re-introducing some redundancy to speed up reads. It's a tradeoff:</p>
+
+            <div class="table-demo">
+                <table>
+                    <thead>
+                        <tr><th>Aspect</th><th>Normalized</th><th>Denormalized</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Storage</td><td>Smaller</td><td>Larger (duplicated values)</td></tr>
+                        <tr><td>Writes</td><td>Fast and simple</td><td>Slower, must update copies</td></tr>
+                        <tr><td>Reads</td><td>Need joins</td><td>Often single-table reads</td></tr>
+                        <tr><td>Integrity</td><td>Strong</td><td>Risk of inconsistency</td></tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="key-message">
+                <p><strong>Default to 3NF.</strong> Denormalize only when you have measured a real performance problem and you have a plan to keep the redundant copies in sync.</p>
+            </div>
+        </section>
+
+        <!-- Practice Exercises -->
+        <section id="exercises" class="content-section">
+            <h2>Practice Exercises</h2>
+
+            <div class="review-questions">
+                <h3>Apply What You've Learned</h3>
+                <ol>
+                    <li>
+                        <strong>Question 1:</strong> A library uses one table:
+                        <code>Loan(MemberId, MemberName, BookId, BookTitle, AuthorId, AuthorName, LoanDate)</code>
+                        with primary key <code>{MemberId, BookId, LoanDate}</code>. Which normal form does it violate, and how would you fix it?
+                        <details>
+                            <summary>Show Answer</summary>
+                            <p>It violates 2NF (partial dependencies: <code>MemberId &rarr; MemberName</code>, <code>BookId &rarr; BookTitle, AuthorId, AuthorName</code>) and also 3NF (transitive: <code>BookId &rarr; AuthorId &rarr; AuthorName</code>).</p>
+                            <p>Final 3NF schema:</p>
+                            <ul>
+                                <li><code>Member(<u>MemberId</u>, MemberName)</code></li>
+                                <li><code>Author(<u>AuthorId</u>, AuthorName)</code></li>
+                                <li><code>Book(<u>BookId</u>, BookTitle, AuthorId<sup>&rarr;FK</sup>)</code></li>
+                                <li><code>Loan(<u>MemberId</u>, <u>BookId</u>, <u>LoanDate</u>)</code> &mdash; all three are FKs as well</li>
+                            </ul>
+                        </details>
+                    </li>
+                    <li>
+                        <strong>Question 2:</strong> Given the FDs <code>A &rarr; B</code>, <code>B &rarr; C</code>, and primary key <code>A</code> on table <code>R(A, B, C)</code>, is <code>R</code> in 3NF? Explain.
+                        <details>
+                            <summary>Show Answer</summary>
+                            <p>No. <code>A &rarr; B</code> is fine, but <code>B &rarr; C</code> is a transitive dependency from the primary key (<code>A</code>) to <code>C</code> via <code>B</code>, where <code>B</code> is not a super key. Decompose to <code>R1(A, B)</code> and <code>R2(B, C)</code>.</p>
+                        </details>
+                    </li>
+                    <li>
+                        <strong>Question 3:</strong> Why doesn't a relation with a single-column primary key need to be checked for 2NF specifically?
+                        <details>
+                            <summary>Show Answer</summary>
+                            <p>2NF only forbids <em>partial</em> dependencies on the primary key. Partial means &ldquo;depends on part of a composite key&rdquo;. A single-column key has no &ldquo;part&rdquo;, so partial dependencies are impossible. Any 1NF table with a single-column PK is automatically 2NF.</p>
+                        </details>
+                    </li>
+                    <li>
+                        <strong>Question 4:</strong> Convert this 1NF table to 3NF. Identify the FDs first.
+                        <div class="table-demo">
+                            <table>
+                                <thead>
+                                    <tr><th>EmpId</th><th>EmpName</th><th>DeptId</th><th>DeptName</th><th>DeptManager</th></tr>
+                                </thead>
+                                <tbody>
+                                    <tr><td>E01</td><td>Ahmed</td><td>D1</td><td>Sales</td><td>Khaled</td></tr>
+                                    <tr><td>E02</td><td>Layla</td><td>D2</td><td>IT</td><td>Sami</td></tr>
+                                    <tr><td>E03</td><td>Omar</td><td>D1</td><td>Sales</td><td>Khaled</td></tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <details>
+                            <summary>Show Answer</summary>
+                            <p>FDs: <code>EmpId &rarr; EmpName, DeptId</code>; <code>DeptId &rarr; DeptName, DeptManager</code>. The PK is <code>EmpId</code>, so 2NF is automatic. But <code>DeptId &rarr; DeptName</code> is transitive &rarr; not in 3NF.</p>
+                            <p>3NF schema:</p>
+                            <ul>
+                                <li><code>Department(<u>DeptId</u>, DeptName, DeptManager)</code></li>
+                                <li><code>Employee(<u>EmpId</u>, EmpName, DeptId<sup>&rarr;FK</sup>)</code></li>
+                            </ul>
+                        </details>
+                    </li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Review Questions -->
+        <section id="review" class="content-section">
+            <h2>Review Questions</h2>
+
+            <div class="review-questions">
+                <h3>Multiple Choice Questions</h3>
+
+                <p><strong>Question 5:</strong> Which anomaly occurs when deleting a row also removes information that should still be kept?</p>
+                <ol type="A">
+                    <li>Insert anomaly</li>
+                    <li>Update anomaly</li>
+                    <li><strong>Delete anomaly</strong></li>
+                    <li>Read anomaly</li>
+                </ol>
+
+                <p><strong>Question 6:</strong> A relation is in 1NF when:</p>
+                <ol type="A">
+                    <li>Every non-prime attribute depends fully on the PK</li>
+                    <li>There are no transitive dependencies</li>
+                    <li><strong>Every cell holds a single, atomic value and there are no repeating groups</strong></li>
+                    <li>Every determinant is a super key</li>
+                </ol>
+
+                <p><strong>Question 7:</strong> Consider <code>R(A, B, C, D)</code> with primary key <code>{A, B}</code> and FDs <code>A &rarr; C</code>, <code>{A, B} &rarr; D</code>. <code>R</code> is in:</p>
+                <ol type="A">
+                    <li>3NF</li>
+                    <li>BCNF</li>
+                    <li><strong>1NF only (violates 2NF because <code>A &rarr; C</code> is partial)</strong></li>
+                    <li>Not in any normal form</li>
+                </ol>
+
+                <p><strong>Question 8:</strong> What is the main difference between 3NF and BCNF?</p>
+                <ol type="A">
+                    <li>3NF allows repeating groups; BCNF doesn't</li>
+                    <li><strong>BCNF requires every determinant to be a super key, while 3NF tolerates a determinant that isn't a super key as long as the dependent attribute is part of some candidate key</strong></li>
+                    <li>3NF requires atomic values; BCNF doesn't</li>
+                    <li>BCNF allows transitive dependencies; 3NF doesn't</li>
+                </ol>
+
+                <p><strong>Question 9:</strong> Which of the following is a valid reason to deliberately denormalize a 3NF schema?</p>
+                <ol type="A">
+                    <li>To make joins easier to type</li>
+                    <li>To save disk space</li>
+                    <li><strong>To meet a measured read-performance requirement that joins cannot satisfy, with a plan to keep duplicates in sync</strong></li>
+                    <li>To allow inconsistent data</li>
+                </ol>
+            </div>
+        </section>
+
+        <!-- Summary -->
+        <section id="summary" class="content-section summary">
+            <h2>Summary and Key Takeaways</h2>
+
+            <h3>What We've Learned</h3>
+            <ol>
+                <li><strong>Why Normalize:</strong> Denormalized tables suffer from insert, update, and delete anomalies because one row mixes independent facts.</li>
+                <li><strong>Functional Dependencies:</strong> <code>X &rarr; Y</code> means &ldquo;X determines Y&rdquo;. Full / partial / transitive dependencies drive the normal-form rules.</li>
+                <li><strong>1NF:</strong> Atomic values, no repeating groups, primary key per row.</li>
+                <li><strong>2NF:</strong> 1NF plus no partial dependencies on a composite primary key.</li>
+                <li><strong>3NF:</strong> 2NF plus no transitive dependencies among non-prime attributes &mdash; the key, the whole key, and nothing but the key.</li>
+                <li><strong>BCNF:</strong> 3NF plus every determinant is a super key. Needed mainly when candidate keys overlap.</li>
+                <li><strong>Decomposition:</strong> The university schema (Student, Professor, Course, Marks) is already in 3NF &mdash; that's why the SQL queries in Lectures 5 and 6+7 stayed clean.</li>
+                <li><strong>Denormalization:</strong> A measured tradeoff for read-heavy workloads, not a default.</li>
+            </ol>
+
+            <div class="key-message">
+                <p><strong>Looking Ahead:</strong> In the next lecture (Lectures 9 &amp; 10), we step back to <em>Data Modelling</em> &mdash; the upstream activity that produces the well-formed schemas we've been normalizing here.</p>
+            </div>
+        </section>
+    </main>
+
+    <footer>
+        <section id="credits">
+            <h2>Credits</h2>
+            <p>Database Programming Course - COMP 2413</p>
+        </section>
+
+        <p style="text-align: center; margin-top: 2rem;">
+            <a href="../index.html">&larr; Back to Course Home</a>
+        </p>
+    </footer>
+</body>
+</html>
